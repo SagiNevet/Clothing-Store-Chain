@@ -1,243 +1,158 @@
 # מערכת ניהול רשת חנויות בגדים
 
-פרויקט גמר בקורס **פיתוח אלגוריתמי JAVA** — HIT, סמסטר קיץ 2026
+פרויקט גמר בקורס פיתוח אלגוריתמי JAVA, HIT, סמסטר קיץ 2026.
 מרצה: רועי זימון
-
----
 
 ## חברי הקבוצה
 
 | # | שם מלא | ת.ז |
 |---|---|---|
-| 1 | _להשלים_ | _להשלים_ |
-| 2 | _להשלים_ | _להשלים_ |
-| 3 | _להשלים_ | _להשלים_ |
-| 4 | _להשלים_ | _להשלים_ |
-| 5 | _להשלים_ | _להשלים_ |
+| 1 | | |
+| 2 | | |
+| 3 | | |
+| 4 | | |
+| 5 | | |
 
----
+## הפעלה
 
-## הוראות הפעלה
+צריך JDK מותקן. אין Maven ואין Gradle. נבדק על JDK 11.
 
-### דרישה יחידה
-**JDK מותקן.** זהו. אין Maven, אין Gradle, אין Spring, ואין צורך בשום IDE.
-פותח ונבדק על **JDK 11 (Temurin 11.0.32)**.
-
-בדיקה שה-JDK מותקן:
 ```
 javac -version
 ```
 
-### שלושה צעדים
-
-```bat
-compile.bat        REM 1. מקמפל את כל המערכת לתיקיית out
-run_server.bat     REM 2. מפעיל את השרת — השאירו את החלון פתוח
-run_client.bat     REM 3. מפעיל לקוח — הריצו אותו פעמיים, לשני סניפים
+```
+compile.bat
+run_server.bat
+run_client.bat
 ```
 
-**הרצה ראשונה** יוצרת אוטומטית את התיקיות `data`, `logs` ו-`reports`,
-ומזריעה 4 עובדי דמו ומלאי התחלתי לשני הסניפים. לא צריך להכין שום דבר מראש.
+את `run_client.bat` מריצים פעמיים כדי לפתוח שני לקוחות, אחד לכל סניף.
+בהרצה הראשונה נוצרות התיקיות `data`, `logs` ו-`reports`, ונוצרים עובדי דמו ומלאי התחלתי.
 
 ### משתמשי דמו
 
-**הסיסמה זהה לכולם: `Chain@2026`**
+הסיסמה של כולם: `Chain@2026`
 
 | מספר עובד | שם | תפקיד | סניף |
 |---|---|---|---|
-| **1001** | Maya Shir | Shift Manager | Tel Aviv |
-| 1002 | Ron Levi | Cashier | Tel Aviv |
-| **2001** | Avi Dagan | Shift Manager | Jerusalem |
-| 2002 | Tamar Ben Ari | Seller | Jerusalem |
+| 1001 | Maya Shir | מנהל משמרת | תל אביב |
+| 1002 | Ron Levi | קופאי | תל אביב |
+| 2001 | Avi Dagan | מנהל משמרת | ירושלים |
+| 2002 | Tamar Ben Ari | מוכר | ירושלים |
 
-> **מנהל משמרת הוא ה-admin של המערכת** — הוא היחיד שרואה את הטאבים
-> Employees ו-Reports, והיחיד שיכול להצטרף לצ'אט קיים.
+מנהל משמרת רואה גם את הטאבים Employees ו-Reports, ויכול להצטרף לשיחת צ'אט שכבר פתוחה.
 
-### הרצת הבדיקות (אופציונלי)
-```bat
+### בדיקות
+
+```
 run_tests.bat
 ```
-**90 בדיקות JUnit.** זהו המקום היחיד בפרויקט שמשתמש ב-jar חיצוני
-(`lib/junit-platform-console-standalone-1.10.2.jar`), והוא כלי פיתוח בלבד —
-**המערכת עצמה מתקמפלת ורצה בלי אף ספרייה חיצונית.**
-הבדיקות כותבות לתיקייה נפרדת (`test-workspace`) ולא נוגעות בנתוני ההדגמה.
 
-### יצירת ה-Javadoc (אופציונלי)
-```bat
+הבדיקות משתמשות ב-`lib/junit-platform-console-standalone-1.10.2.jar`. שאר המערכת רצה בלי ספריות חיצוניות. התוצרים נכתבים ל-`test-workspace` ולא לקבצי ההרצה הרגילה.
+
+### Javadoc
+
+```
 generate_javadoc.bat
 ```
-נוצר ב-`javadoc/index.html`. **0 שגיאות, 0 אזהרות.**
 
----
+הקבצים נוצרים ב-`javadoc/index.html`.
 
-## מה להדגים — מסלול מומלץ
+## סוגי לקוחות
 
-הפעילו שרת ו-**שלושה** לקוחות: 1002 (קופאי ת"א), 1001 (מנהל ת"א), 2002 (מוכרת ירושלים).
-
-| # | מה עושים | מה רואים |
-|---|---|---|
-| 1 | מתחברים כ-1002 ואז כ-1001 | לקופאי **3 טאבים**, למנהל **5** |
-| 2 | מנסים להתחבר כ-1001 בחלון נוסף | נדחה: "already logged in from another computer" |
-| 3 | ב-1002: Customers → Register customer | הלקוח מופיע **מיד** גם אצל 1001 וגם אצל 2002 |
-| 4 | ב-1002: Inventory → Sell to customer | הכמות משתנה **מיד** אצל 1001 (אותו סניף), **לא** אצל 2002 |
-| 5 | מוכרים לאותו לקוח 5 פעמים | עמודת Customer kind: New → Returning → **VIP**, וההנחה גדלה |
-| 6 | ב-1001: Employees → Create account | חשבון נוצר; נסו סיסמה חלשה — נדחית עם כל ההפרות |
-| 7 | ב-1002: Chat → Start conversation with Jerusalem | אצל 2002 **נפתחת שיחה מעצמה** |
-| 8 | ב-1001: Chat → Join an open conversation | המנהל מקבל את **כל ההיסטוריה** |
-| 9 | ב-1001: Reports → Build → Export to Word | נפתח ב-Word **בלי אזהרה** |
-| 10 | פותחים את `logs/*.log` ב-Notepad | כל פעולה רשומה |
-
-### להדגמת המקביליות (שלב 5)
-לפני ההגנה שנו ב-`config.properties`:
-```properties
-demo.taskDelayMillis=1500
-```
-הריצו במקביל **רישום עובד** אצל 1001 ו**מכירה** אצל 1002, והצביעו על הקונסולה של השרת:
-```
-[Executor] START ADD_EMPLOYEE  on pool-1-thread-2
-[Executor] START SELL_PRODUCT  on pool-1-thread-3   ← התחילה לפני שהראשונה נגמרה
-[Executor] END   SELL_PRODUCT  on pool-1-thread-3 after 1545 ms
-[Executor] END   ADD_EMPLOYEE  on pool-1-thread-2 after 1689 ms
-```
-
----
-
-## הקריטריון למעבר בין סוגי לקוחות
-
-מוגדר ב-`CustomerFactory` וניתן לשינוי ב-`config.properties`:
+הקריטריונים מוגדרים ב-`CustomerFactory` ואפשר לשנות אותם ב-`config.properties`.
 
 | מעבר | תנאי |
 |---|---|
-| `NewCustomer` → `ReturningCustomer` | אחרי **הרכישה הראשונה** |
-| `ReturningCustomer` → `VipCustomer` | אחרי **5 רכישות** *או* **1000 ש"ח מצטבר** (המוקדם מביניהם) |
+| NewCustomer → ReturningCustomer | אחרי הרכישה הראשונה |
+| ReturningCustomer → VipCustomer | אחרי 5 רכישות או 1000 ש"ח מצטבר, לפי מה שמגיע קודם |
 
-### מסלולי הרכישה
-
-| סוג לקוח | ההנחה |
+| סוג | הנחה |
 |---|---|
-| `NewCustomer` | 10% הנחת הצטרפות על הרכישה הראשונה בלבד |
-| `ReturningCustomer` | 5% קבוע; **8%** בקנייה של 3 פריטים ומעלה |
-| `VipCustomer` | 15% קבוע; **20%** בהזמנה מעל 500 ש"ח |
+| NewCustomer | 10% על הרכישה הראשונה |
+| ReturningCustomer | 5%, ו-8% בקנייה של 3 פריטים ומעלה |
+| VipCustomer | 15%, ו-20% בהזמנה מעל 500 ש"ח |
 
-**המעבר מחליף את האובייקט ולא משנה שדה** — כי סוג הלקוח מיוצג ע"י המחלקה,
-וזה מה שגורם לקריאה הפולימורפית לעבוד. `CustomerFactory.upgradeIfNeeded()`
-יוצר מופע חדש ומעתיק את ההיסטוריה.
+כשלקוח עובר סוג נוצר אובייקט חדש במחלקה המתאימה (`CustomerFactory.upgradeIfNeeded`), כי סוג הלקוח מיוצג בירושה ולא בשדה.
 
----
+## Design Patterns
 
-## היכן ממומש כל Design Pattern
+| Pattern | מחלקות |
+|---|---|
+| Observer | `EventPublisher`, `ClientEventDispatcher`, `ServerEventListener` |
+| Singleton | `SessionManager`, `LogManager`, `ClientRegistry`, `ServerContext`, `AppConfig`, `ChatService`, `ChatQueueManager`, `EventPublisher`, `ClientSession` |
+| Strategy | `Customer`, `NewCustomer`, `ReturningCustomer`, `VipCustomer` |
+| Factory | `CustomerFactory`, `CommandFactory`, ייצוא דוחות |
+| Command | `Command` והמימושים ב-`server/command` |
 
-| Pattern | מחלקות | מה הוא נותן |
-|---|---|---|
-| **Observer** | `server/observer/EventPublisher`<br>`client/net/ClientEventDispatcher`<br>`client/net/ServerEventListener` | השרת מודיע ללקוחות על שינוי בלי להכיר את ה-GUI. בלעדיו כל מסך היה עושה polling כל שנייה |
-| **Singleton** | `SessionManager`, `LogManager`, `ClientRegistry`,<br>`ServerContext`, `AppConfig`, `ChatService`,<br>`ChatQueueManager`, `EventPublisher`, `ClientSession` | מצב גלובלי יחיד. שתי טבלאות sessions = מניעת התחברות כפולה נשברת |
-| **Strategy** (בירושה) | `Customer` + `NewCustomer` / `ReturningCustomer` / `VipCustomer` | כל מסלול רכישה הוא אלגוריתם עצמאי. סוג לקוח חדש = מחלקה אחת, בלי לגעת בקוד המכירה |
-| **Factory** | `CustomerFactory`, `CommandFactory`,<br>`ReportCommands.ExportReport.exporterFor` | יצירה לפי enum במקום `switch` שמתפזר בקוד |
-| **Command** | `server/command/Command` + 19 מימושים | כל בקשה = אובייקט פעולה. הרשאות, לוגים וטיפול בשגיאות נכתבים **פעם אחת** סביב `command.execute()` |
-
----
-
-## ארכיטקטורה
+## מבנה הפרויקט
 
 ```
 src/
-├── common/          משותף לשרת וללקוח — עובר בסריאליזציה
-│   ├── model/       19 מחלקות: Employee, Customer + 3 תתי-מחלקות, Product, Sale...
-│   ├── protocol/    Request, Response, ServerEvent, ActionType, EventType, ProtocolKeys
-│   ├── exception/   10 חריגות משלנו, כולן יורשות מ-ChainStoreException
-│   └── util/        PasswordHasher, TimeUtil, AppConfig, IdGenerator
-├── server/
-│   ├── core/        ChainServer (accept loop), ClientHandler (thread לכל לקוח),
-│   │                ConnectedClient, ClientRegistry, ServerContext, DataSeeder
-│   ├── command/     Command + CommandFactory + 15 קבצי מימוש
-│   ├── service/     Authentication, Session, Inventory, Customer, Employee,
-│   │                Report, Log, BusinessTaskExecutor
-│   ├── observer/    EventPublisher
-│   ├── chat/        ChatService, ChatSession, ChatQueueManager, PendingChatRequest
-│   ├── report/      ReportExporter + WordRtfExporter + JsonExporter
-│   └── storage/     FileRepository גנרי + 5 repositories + LogWriter + StoragePaths
-├── client/
-│   ├── net/         ServerConnection (שליחה + האזנה אסינכרונית), ClientEventDispatcher
-│   ├── controller/  7 controllers — המסכים לא יודעים מה זה Request
-│   └── gui/         12 מחלקות Swing
-└── test/            10 מחלקות, 90 בדיקות JUnit 5
+├── common/     model, protocol, exception, util
+├── server/     core, command, service, observer, chat, report, storage
+├── client/     net, controller, gui
+└── test/
 ```
 
-**109 מחלקות מערכת + 10 מחלקות בדיקה.**
+`common` משותף לשרת וללקוח ועובר בסריאליזציה.
 
----
-
-## Threads — היכן הם בקוד
+## Threads
 
 | מנגנון | מיקום |
 |---|---|
-| `accept()` בלולאה | `ChainServer.acceptClientsUntilStopped` |
-| thread לכל לקוח | `ChainServer` → `new Thread(new ClientHandler(socket))` — **ללא הגבלת מספר** |
-| `ExecutorService` / `newFixedThreadPool` | `BusinessTaskExecutor` — תקרה על פעולות עסקיות מקבילות |
-| `wait()` / `notify()` | `ChatQueueManager.findPartnerOrQueue` / `markFree` |
-| `synchronized` על **בלוק** | `InventoryService.sell` (על המוצר), `ConnectedClient.send` (על הזרם), `LogWriter` (מנעול לכל קטגוריה), `CustomerService` (מנעול לכל לקוח) |
-| Collections thread-safe | `CopyOnWriteArrayList`, `ConcurrentHashMap` |
-| עצירה בדגל בוליאני | `ChainServer.isRunning`, `ClientHandler.isHandlerRunning`, `ServerConnection.isListening` — כולם `volatile`, **אף פעם לא `stop()`** |
-| שחרור ב-`finally` | `ClientHandler.run` → `releaseConnection()` |
-| thread האזנה בלקוח | `ServerConnection.listenForIncomingObjects` |
-| Swing EDT | כל עדכון מסך דרך `SwingUtilities.invokeLater` |
+| לולאת `accept` | `ChainServer` |
+| thread לכל לקוח | `ClientHandler` (בלי הגבלת מספר) |
+| `ExecutorService` | `BusinessTaskExecutor` |
+| `wait` / `notify` | `ChatQueueManager` |
+| `synchronized` | `InventoryService.sell`, `ConnectedClient.send`, `LogWriter`, `CustomerService` |
+| Collections | `CopyOnWriteArrayList`, `ConcurrentHashMap` |
+| עצירה עם דגל `volatile` | `ChainServer`, `ClientHandler`, `ServerConnection` |
+| שחרור ב-`finally` | `ClientHandler` |
+| האזנה בלקוח | `ServerConnection` |
+| Swing EDT | `SwingUtilities.invokeLater` |
 
----
-
-## הגדרות — `config.properties`
-
-```properties
-server.port=5000                  # הפורט של השרת
-server.host=localhost             # הכתובת שהלקוחות מתחברים אליה
-business.threadPool.size=4        # כמה פעולות עסקיות במקביל
-demo.taskDelayMillis=0            # 1500 לפני ההגנה, כדי לראות מקביליות בעין
-chat.saveMessageContent=false     # האם לשמור את תוכן הודעות הצ'אט בלוג
-chat.waitForPartnerMillis=3000    # כמה זמן בקשת צ'אט ממתינה לפני שהיא נכנסת לתור
-customer.vip.minPurchases=5       # סף VIP לפי מספר רכישות
-customer.vip.minTotalSpent=1000   # סף VIP לפי סכום מצטבר
-```
-
-המערכת עולה תקין גם אם הקובץ נמחק — לכל הגדרה יש ברירת מחדל בקוד.
-
----
-
-## קבצים שנוצרים בזמן ריצה
+כדי לראות שתי פעולות במקביל בקונסולת השרת אפשר לשים ב-`config.properties`:
 
 ```
-data/     employees.dat, customers.dat, sales.dat, password_policy.dat,
-          inventory_TEL_AVIV.dat, inventory_JERUSALEM.dat
-logs/     employees.log, customers.log, sales.log, chat.log   (טקסט — נפתח ב-Notepad)
-reports/  sales_by_branch_<timestamp>.rtf, ...                (נפתח ב-Word)
+demo.taskDelayMillis=1500
 ```
 
-**אין מסד נתונים.** הכל בקבצים, עם Java Object Serialization.
+ואז להריץ בו-זמנית פעולה אצל שני לקוחות.
 
----
+## config.properties
 
-## תיעוד נוסף
+```
+server.port=5000
+server.host=localhost
+business.threadPool.size=4
+demo.taskDelayMillis=0
+chat.saveMessageContent=false
+chat.waitForPartnerMillis=3000
+customer.vip.minPurchases=5
+customer.vip.minTotalSpent=1000
+```
 
-בתיקיית `docs/` יש הסבר מפורט לכל שלב בעברית, כולל **שאלות הגנה צפויות עם תשובות**:
+אם הקובץ נמחק המערכת עדיין עולה, כי לכל הגדרה יש ברירת מחדל בקוד.
 
-| קובץ | נושא |
-|---|---|
-| [`DEFENSE_CHEATSHEET.md`](docs/DEFENSE_CHEATSHEET.md) | **30 השאלות הסבירות ביותר עם תשובות — התחילו מכאן** |
-| [`STAGE1_EXPLAINED.md`](docs/STAGE1_EXPLAINED.md) | מודל, פרוטוקול, חריגות, אחסון, פולימורפיזם |
-| [`STAGE2_EXPLAINED.md`](docs/STAGE2_EXPLAINED.md) | שרת, thread לכל לקוח, מניעת התחברות כפולה |
-| [`STAGE3_EXPLAINED.md`](docs/STAGE3_EXPLAINED.md) | GUI, שליחה והאזנה בו-זמנית, כללי Swing |
-| [`STAGE4_EXPLAINED.md`](docs/STAGE4_EXPLAINED.md) | מלאי, לקוחות, Observer, race conditions |
-| [`STAGE5_EXPLAINED.md`](docs/STAGE5_EXPLAINED.md) | ExecutorService והדגמת המקביליות |
-| [`STAGE6_EXPLAINED.md`](docs/STAGE6_EXPLAINED.md) | צ'אט, תור, `wait`/`notify` |
-| [`STAGE7_EXPLAINED.md`](docs/STAGE7_EXPLAINED.md) | דוחות וייצוא ל-Word |
-| [`PLAN_STAGE0.md`](PLAN_STAGE0.md) | התכנון המקורי |
+## קבצים בזמן ריצה
 
----
+```
+data/      employees.dat, customers.dat, sales.dat, password_policy.dat,
+           inventory_TEL_AVIV.dat, inventory_JERUSALEM.dat
+logs/      employees.log, customers.log, sales.log, chat.log
+reports/   דוחות .rtf ו-.json
+```
 
-## פתרון תקלות
+אין מסד נתונים. האחסון הוא Java Object Serialization לקבצים.
+
+## תקלות נפוצות
 
 | בעיה | פתרון |
 |---|---|
-| `javac` לא מזוהה | ה-JDK לא ב-PATH. התקינו JDK והוסיפו את `bin` שלו ל-PATH |
-| הלקוח: "Could not connect to the server" | השרת לא רץ. הריצו `run_server.bat` קודם |
-| "Address already in use" | שרת אחר כבר תופס את הפורט. סגרו אותו או שנו `server.port` |
-| רוצים להתחיל מנתונים נקיים | מחקו את התיקיות `data` ו-`logs`. ההרצה הבאה תזריע מחדש |
-| רוצים להריץ שרת ולקוח על שני מחשבים | שנו `server.host` בקובץ של הלקוח לכתובת ה-IP של מחשב השרת |
+| `javac` לא מזוהה | ה-JDK לא ב-PATH |
+| Could not connect to the server | השרת לא רץ. להריץ קודם `run_server.bat` |
+| Address already in use | משהו כבר תופס את הפורט. לסגור אותו או לשנות `server.port` |
+| רוצים נתונים נקיים | למחוק את `data` ו-`logs`. ההרצה הבאה תיצור אותם מחדש |
+| שרת ולקוח על שני מחשבים | בצד הלקוח לשנות `server.host` לכתובת ה-IP של מחשב השרת |
