@@ -1,146 +1,151 @@
-# מערכת ניהול רשת חנויות בגדים
+# Clothing Store Chain
 
-פרויקט גמר בקורס פיתוח אלגוריתמי JAVA, HIT, סמסטר קיץ 2026.
-מרצה: רועי זימון
+A Java/Swing client-server system for managing a clothing store chain, written for the Java course at HIT.
 
-## חברי הקבוצה
+## Team
 
-1. שם מלא:    ת.ז.:
-2. שם מלא:    ת.ז.:
-3. שם מלא:    ת.ז.:
-4. שם מלא:    ת.ז.:
-5. שם מלא:    ת.ז.:
+| Name | ID |
+|---|---|
+| [FILL IN] | [FILL IN] |
+| [FILL IN] | [FILL IN] |
+| [FILL IN] | [FILL IN] |
+| [FILL IN] | [FILL IN] |
+| [FILL IN] | [FILL IN] |
 
-## הפעלה
+## Requirements
 
-צריך JDK מותקן. אין Maven ואין Gradle. נבדק על JDK 11.
+- Tested on JDK 11.
+- No Maven, no Gradle, no Spring, no external libraries. The system is pure JDK.
+- JUnit is used for tests only (`lib/junit-platform-console-standalone-1.10.2.jar`). The application itself compiles and runs with no external library.
 
-```
-javac -version
-```
+## How to run
+
+Run everything from the project root. The `.bat` scripts are the recommended way on Windows. The `javac` / `java` commands are a backup if the scripts do not run.
+
+### A. Compile
+
+Compiles `src/common`, `src/server` and `src/client` into `out`. Tests are not compiled here.
+
+Recommended:
 
 ```
 compile.bat
+```
+
+Manual backup:
+
+```
+mkdir out
+javac -encoding UTF-8 -d out -sourcepath src src/server/core/ChainServer.java src/client/gui/LoginFrame.java
+```
+
+### B. Run the server
+
+Start the server **before** any client. It listens on port **5000** (`server.port` in `config.properties`, default 5000 in `ChainServer`).
+
+Recommended:
+
+```
 run_server.bat
+```
+
+Manual backup:
+
+```
+java -cp out server.core.ChainServer
+```
+
+Leave this window open.
+
+The first run creates `data`, `logs` and `reports` if they are missing, and seeds demo employees plus starting inventory when those files are still empty (`DataSeeder`).
+
+### C. Run a client
+
+Run a client **twice, in two separate windows**, so you can log in as Tel Aviv in one and Jerusalem in the other. That is how chat and live updates are checked.
+
+Recommended (run this twice):
+
+```
 run_client.bat
 ```
 
-את `run_client.bat` מריצים פעמיים כדי לפתוח שני לקוחות, אחד לכל סניף.
-בהרצה הראשונה נוצרות התיקיות `data`, `logs` וגם `reports`, ונוצרים עובדי דמו ומלאי התחלתי.
+Each call opens a new window.
 
-### משתמשי דמו
-
-הסיסמה של כולם: `Chain@2026`
-
-* 1001, Maya Shir, מנהל משמרת, תל אביב
-* 1002, Ron Levi, קופאי, תל אביב
-* 2001, Avi Dagan, מנהל משמרת, ירושלים
-* 2002, Tamar Ben Ari, מוכר, ירושלים
-
-מנהל משמרת רואה גם את הטאבים Employees וגם Reports, ויכול להצטרף לשיחת צ'אט שכבר פתוחה.
-
-### בדיקות
+Manual backup (run once in each of two terminals):
 
 ```
-run_tests.bat
+java -cp out client.gui.LoginFrame
 ```
 
-הבדיקות משתמשות ב `lib/junit-platform-console-standalone-1.10.2.jar`. שאר המערכת רצה בלי ספריות חיצוניות. התוצרים נכתבים ל `test-workspace` ולא לקבצי ההרצה הרגילה.
+Host and port come from `config.properties` (`server.host=localhost`, `server.port=5000`).
 
-### Javadoc
+## Demo users
 
-```
-generate_javadoc.bat
-```
+Log in with the **employee number** and password. All demo accounts are created by `DataSeeder` with the same password `Chain@2026` (stored hashed). There is no separate Admin role: a Shift Manager is the admin of the system.
 
-הקבצים נוצרים ב `javadoc/index.html`.
+| Username | Password | Role | Branch |
+|---|---|---|---|
+| 1001 | Chain@2026 | Shift Manager | Tel Aviv |
+| 1002 | Chain@2026 | Cashier | Tel Aviv |
+| 2001 | Chain@2026 | Shift Manager | Jerusalem |
+| 2002 | Chain@2026 | Seller | Jerusalem |
 
-## סוגי לקוחות
+1001 is the Tel Aviv admin. 2002 is a Jerusalem seller. Cashier and Seller have the same permissions; Shift Manager also sees Employees and Reports, and can join an open chat.
 
-הקריטריונים מוגדרים ב `CustomerFactory` ואפשר לשנות אותם ב `config.properties`.
+## What to test
 
-* NewCustomer הופך ל ReturningCustomer אחרי הרכישה הראשונה
-* ReturningCustomer הופך ל VipCustomer אחרי 5 רכישות או 1000 ש"ח מצטבר, לפי מה שמגיע קודם
+1. **Login by role.** Log in as 1002 (Cashier): Inventory, Customers, Chat. Log in as 1001 (Shift Manager): the same tabs plus Employees and Reports.
+2. **Sale in one branch (Observer).** Sell a product in Tel Aviv. Stock updates at once for every client of Tel Aviv, not for Jerusalem.
+3. **Customer add/update.** Register or edit a customer. The change appears in every connected branch (the customer list is shared).
+4. **Customer kinds (Strategy).** New: 10% on the first purchase. Returning: 5%, or 8% on 3+ items. VIP: 15%, or 20% on orders above 500. The price comes from the subclass, not from an if on the type.
+5. **Chat (queue).** Open a conversation from Tel Aviv to Jerusalem while someone is free: the other window opens the chat. Then start a chat while the Jerusalem employee is already in a conversation: the request is kept in the queue. When that employee becomes free, the waiting side gets a notification (`CHAT_PEER_AVAILABLE`) and can try again. `ChatQueueManager` waits with `wait()` / `notifyAll()` for a short window (`chat.waitForPartnerMillis`, default 3000 ms); after that the request stays queued instead of holding a pool thread.
+6. **Join chat.** Only a Shift Manager can join an open conversation (Chat tab, join). A Cashier or Seller cannot.
+7. **Duplicate login.** Log in as 1001, then try 1001 again in another window. The second login is rejected.
+8. **Threads.** Create an employee as 1001 and sell as 1002 at the same time. Neither action blocks the other. Optional: set `demo.taskDelayMillis=1500` in `config.properties` so overlapping `START` / `END` lines are easy to see on the server console.
+9. **Reports.** As a Shift Manager, build a report and export to Word (RTF file under `reports/`).
+10. **Logs.** Open `logs/employees.log`, `logs/customers.log`, `logs/sales.log`, `logs/chat.log`. Each action type has its own file.
 
-הנחות:
-
-* NewCustomer: 10% על הרכישה הראשונה
-* ReturningCustomer: 5%, וגם 8% בקנייה של 3 פריטים ומעלה
-* VipCustomer: 15%, וגם 20% בהזמנה מעל 500 ש"ח
-
-כשלקוח עובר סוג נוצר אובייקט חדש במחלקה המתאימה (`CustomerFactory.upgradeIfNeeded`), כי סוג הלקוח מיוצג בירושה ולא בשדה.
-
-## Design Patterns
-
-* Observer: `EventPublisher`, `ClientEventDispatcher`, `ServerEventListener`
-* Singleton: `SessionManager`, `LogManager`, `ClientRegistry`, `ServerContext`, `AppConfig`, `ChatService`, `ChatQueueManager`, `EventPublisher`, `ClientSession`
-* Strategy: `Customer`, `NewCustomer`, `ReturningCustomer`, `VipCustomer`
-* Factory: `CustomerFactory`, `CommandFactory`, ייצוא דוחות
-* Command: `Command` והמימושים ב `server/command`
-
-## מבנה הפרויקט
+## Project structure
 
 ```
 src/
-  common/     model, protocol, exception, util
-  server/     core, command, service, observer, chat, report, storage
-  client/     net, controller, gui
-  test/
+  common/     Shared model, protocol, exceptions, utilities (serialized over the socket)
+  server/     Accept loop, commands, services, chat, reports, file storage
+  client/     Swing GUI, controllers, connection
+  test/       JUnit tests (compiled only by run_tests.bat)
 ```
 
-`common` משותף לשרת וללקוח ועובר בסריאליזציה.
+## Design patterns and key decisions
 
-## Threads
+| Pattern | Where |
+|---|---|
+| Observer | `EventPublisher` on the server, `ClientEventDispatcher` / `ServerEventListener` on the client. Inventory events go to one branch. Customer events go to every client. |
+| Singleton | `SessionManager`, `LogManager`, `ClientRegistry`, `ServerContext`, `AppConfig`, `ChatService`, `ChatQueueManager`, `EventPublisher`, `ClientSession` |
+| Strategy | `Customer` with `NewCustomer`, `ReturningCustomer`, `VipCustomer` (each kind has its own price calculation) |
+| Factory | `CustomerFactory`, `CommandFactory`, report exporter selection |
+| Command | `server.command.Command` and the action classes under `server/command/impl` |
+| Chat queue | Monitor: `wait()` / `notifyAll()` plus a FIFO waiting list in `ChatQueueManager` |
 
-* לולאת `accept`: `ChainServer`
-* thread לכל לקוח: `ClientHandler` (בלי הגבלת מספר)
-* `ExecutorService`: `BusinessTaskExecutor`
-* `wait` / `notify`: `ChatQueueManager`
-* `synchronized`: `InventoryService.sell`, `ConnectedClient.send`, `LogWriter`, `CustomerService`
-* Collections: `CopyOnWriteArrayList`, `ConcurrentHashMap`
-* עצירה עם דגל `volatile`: `ChainServer`, `ClientHandler`, `ServerConnection`
-* שחרור ב `finally`: `ClientHandler`
-* האזנה בלקוח: `ServerConnection`
-* Swing EDT: `SwingUtilities.invokeLater`
+Customer kind changes (`CustomerFactory`):
 
-כדי לראות שתי פעולות במקביל בקונסולת השרת אפשר לשים ב `config.properties`:
+- New becomes Returning after the first completed purchase.
+- Returning becomes VIP after 5 purchases **or** 1000 total spent, whichever comes first (`customer.vip.minPurchases` and `customer.vip.minTotalSpent` in `config.properties`).
+- The object is replaced with a new instance of the next class. The kind is the class, not a field.
 
-```
-demo.taskDelayMillis=1500
-```
+Word export:
 
-ואז להריץ בו זמנית פעולה אצל שני לקוחות.
+- Reports are written as **RTF** (`.rtf`) by `WordRtfExporter`, using only JDK file writing.
+- No Apache POI or other library. HTML saved as `.doc` was not used, because Word shows a format warning. Word opens RTF without that warning.
 
-## config.properties
+## Data files
 
-```
-server.port=5000
-server.host=localhost
-business.threadPool.size=4
-demo.taskDelayMillis=0
-chat.saveMessageContent=false
-chat.waitForPartnerMillis=3000
-customer.vip.minPurchases=5
-customer.vip.minTotalSpent=1000
-```
-
-אם הקובץ נמחק המערכת עדיין עולה, כי לכל הגדרה יש ברירת מחדל בקוד.
-
-## קבצים בזמן ריצה
+Created at runtime under the folder the server was started from (usually the project root). There is no database. State is Java object serialization. Logs are plain text.
 
 ```
 data/      employees.dat, customers.dat, sales.dat, password_policy.dat,
            inventory_TEL_AVIV.dat, inventory_JERUSALEM.dat
 logs/      employees.log, customers.log, sales.log, chat.log
-reports/   דוחות rtf וגם json
+reports/   sales_by_branch_<timestamp>.rtf (and .json), same for sales_by_product
 ```
 
-אין מסד נתונים. האחסון הוא Java Object Serialization לקבצים.
-
-## תקלות נפוצות
-
-* `javac` לא מזוהה: ה JDK לא ב PATH
-* Could not connect to the server: השרת לא רץ. להריץ קודם `run_server.bat`
-* Address already in use: משהו כבר תופס את הפורט. לסגור אותו או לשנות `server.port`
-* רוצים נתונים נקיים: למחוק את `data` וגם `logs`. ההרצה הבאה תיצור אותם מחדש
-* שרת ולקוח על שני מחשבים: בצד הלקוח לשנות `server.host` לכתובת ה IP של מחשב השרת
+To start clean, delete `data` and `logs`. The next server start seeds the demo employees and inventory again.
