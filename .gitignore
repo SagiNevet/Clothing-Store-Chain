@@ -1,0 +1,13 @@
+# Build output
+out/
+out-test/
+*.class
+sources.txt
+
+# Generated documentation
+javadoc/
+
+# Runtime logs and exported reports
+logs/
+reports/
+test-workspace/
