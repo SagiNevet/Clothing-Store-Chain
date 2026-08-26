@@ -6,7 +6,7 @@ A Java/Swing client-server system for managing a clothing store chain, written f
 
 | Name | ID |
 |---|---|
-| [FILL IN] | [FILL IN] |
+| Teva Jalink | 208181446 |
 | [FILL IN] | [FILL IN] |
 | [FILL IN] | [FILL IN] |
 | [FILL IN] | [FILL IN] |
