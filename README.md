@@ -7,7 +7,7 @@ A Java/Swing client-server system for managing a clothing store chain, written f
 | Name | ID |
 |---|---|
 | Teva Jalink | 208181446 |
-| [FILL IN] | [FILL IN] |
+| Michelle Aizikovich | 317868172 |
 | [FILL IN] | [FILL IN] |
 | [FILL IN] | [FILL IN] |
 | [FILL IN] | [FILL IN] |
