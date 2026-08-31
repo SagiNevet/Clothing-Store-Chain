@@ -1,6 +1,6 @@
 @echo off
 REM ===================================================================
-REM  Starts one client of the chain.
+REM  Starts one CONSOLE CLIENT of the chain.
 REM  Run compile.bat once, and start run_server.bat, before this script.
 REM
 REM  Run this script TWICE to demonstrate two branches at the same time:
@@ -13,4 +13,4 @@ if not exist "%~dp0out" (
     exit /b 1
 )
 
-start "Chain Client" java -cp "%~dp0out" client.gui.LoginFrame
+start "Clothing Chain Console Client" cmd /k "chcp 65001 >nul && java -cp "%~dp0out" client.console.ConsoleMain"

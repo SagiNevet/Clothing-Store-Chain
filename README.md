@@ -1,6 +1,6 @@
 # Clothing Store Chain
 
-A Java/Swing client-server system for managing a clothing store chain, written for the Java course at HIT.
+A Java client-server console system for managing a clothing store chain, written for the Java course at HIT.
 
 ## Team
 
@@ -36,7 +36,7 @@ Manual backup:
 
 ```
 mkdir out
-javac -encoding UTF-8 -d out -sourcepath src src/server/core/ChainServer.java src/client/gui/LoginFrame.java
+javac -encoding UTF-8 -d out -sourcepath src src/server/core/ChainServer.java src/client/console/ConsoleMain.java
 ```
 
 ### B. Run the server
@@ -61,7 +61,7 @@ The first run creates `data`, `logs` and `reports` if they are missing, and seed
 
 ### C. Run a client
 
-Run a client **twice, in two separate windows**, so you can log in as Tel Aviv in one and Jerusalem in the other. That is how chat and live updates are checked.
+Run a client **twice, in two separate terminal windows**, so you can log in as Tel Aviv in one and Jerusalem in the other. That is how chat and live updates are checked.
 
 Recommended (run this twice):
 
@@ -69,12 +69,12 @@ Recommended (run this twice):
 run_client.bat
 ```
 
-Each call opens a new window.
+Each call opens an interactive console window.
 
 Manual backup (run once in each of two terminals):
 
 ```
-java -cp out client.gui.LoginFrame
+java -cp out client.console.ConsoleMain
 ```
 
 Host and port come from `config.properties` (`server.host=localhost`, `server.port=5000`).
@@ -90,20 +90,20 @@ Log in with the **employee number** and password. All demo accounts are created 
 | 2001 | Chain@2026 | Shift Manager | Jerusalem |
 | 2002 | Chain@2026 | Seller | Jerusalem |
 
-1001 is the Tel Aviv admin. 2002 is a Jerusalem seller. Cashier and Seller have the same permissions; Shift Manager also sees Employees and Reports, and can join an open chat.
+1001 is the Tel Aviv admin. 2002 is a Jerusalem seller. Cashier and Seller have the same permissions; Shift Manager also sees employee management, password policy, reports in JSON/Word, and can join an open chat.
 
 ## What to test
 
-1. **Login by role.** Log in as 1002 (Cashier): Inventory, Customers, Chat. Log in as 1001 (Shift Manager): the same tabs plus Employees and Reports.
+1. **Login by role.** Log in as 1002 (Cashier): Inventory, Customers, Chat. Log in as 1001 (Shift Manager): the same options plus Employees, Password Policy, Reports and Admin Chat options.
 2. **Sale in one branch (Observer).** Sell a product in Tel Aviv. Stock updates at once for every client of Tel Aviv, not for Jerusalem.
 3. **Customer add/update.** Register or edit a customer. The change appears in every connected branch (the customer list is shared).
 4. **Customer kinds (Strategy).** New: 10% on the first purchase. Returning: 5%, or 8% on 3+ items. VIP: 15%, or 20% on orders above 500. The price comes from the subclass, not from an if on the type.
 5. **Chat (queue).** Open a conversation from Tel Aviv to Jerusalem while someone is free: the other window opens the chat. Then start a chat while the Jerusalem employee is already in a conversation: the request is kept in the queue. When that employee becomes free, the waiting side gets a notification (`CHAT_PEER_AVAILABLE`) and can try again. `ChatQueueManager` waits with `wait()` / `notifyAll()` for a short window (`chat.waitForPartnerMillis`, default 3000 ms); after that the request stays queued instead of holding a pool thread.
-6. **Join chat.** Only a Shift Manager can join an open conversation (Chat tab, join). A Cashier or Seller cannot.
+6. **Join chat.** Only a Shift Manager can join an open conversation (Admin Chat menu). A Cashier or Seller cannot.
 7. **Duplicate login.** Log in as 1001, then try 1001 again in another window. The second login is rejected.
 8. **Threads.** Create an employee as 1001 and sell as 1002 at the same time. Neither action blocks the other. Optional: set `demo.taskDelayMillis=1500` in `config.properties` so overlapping `START` / `END` lines are easy to see on the server console.
-9. **Reports.** As a Shift Manager, build a report and export to Word (RTF file under `reports/`).
-10. **Logs.** Open `logs/employees.log`, `logs/customers.log`, `logs/sales.log`, `logs/chat.log`. Each action type has its own file.
+9. **Reports.** As a Shift Manager, build a report and export to JSON or Word (RTF file under `reports/`).
+10. **Logs.** View `logs/employees.log`, `logs/customers.log`, `logs/sales.log`, `logs/chat.log`. Each action type has its own file.
 
 ## Project structure
 
@@ -111,7 +111,7 @@ Log in with the **employee number** and password. All demo accounts are created 
 src/
   common/     Shared model, protocol, exceptions, utilities (serialized over the socket)
   server/     Accept loop, commands, services, chat, reports, file storage
-  client/     Swing GUI, controllers, connection
+  client/     Console CLI, controllers, connection, optional Swing GUI
   test/       JUnit tests (compiled only by run_tests.bat)
 ```
 
@@ -132,10 +132,10 @@ Customer kind changes (`CustomerFactory`):
 - Returning becomes VIP after 5 purchases **or** 1000 total spent, whichever comes first (`customer.vip.minPurchases` and `customer.vip.minTotalSpent` in `config.properties`).
 - The object is replaced with a new instance of the next class. The kind is the class, not a field.
 
-Word export:
+Word and JSON export:
 
-- Reports are written as **RTF** (`.rtf`) by `WordRtfExporter`, using only JDK file writing.
-- No Apache POI or other library. HTML saved as `.doc` was not used, because Word shows a format warning. Word opens RTF without that warning.
+- Reports are written as **RTF** (`.rtf`) by `WordRtfExporter` and as **JSON** (`.json`) by `JsonExporter`, using only JDK file writing.
+- No Apache POI or external library. Word opens RTF natively without warnings.
 
 ## Data files
 
