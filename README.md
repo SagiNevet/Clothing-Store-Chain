@@ -1,151 +1,205 @@
-# Clothing Store Chain
+# Clothing Store Chain Management System
 
-A Java client-server console system for managing a clothing store chain, written for the Java course at HIT.
+A Java client-server console-based system for managing a clothing store retail chain, developed for the Java Algorithms and Object-Oriented Programming course at HIT (Summer 2026).
+
+---
 
 ## Team
 
-| Name | ID |
-|---|---|
-| Teva Jalink | 208181446 |
-| Michelle Aizikovich | 317868172 |
-| [FILL IN] | [FILL IN] |
-| [FILL IN] | [FILL IN] |
-| [FILL IN] | [FILL IN] |
+| # | Name | ID |
+|---|---|---|
+| 1 | Teva Jalink | 208181446 |
+| 2 | Michelle Aizikovich | 317868172 |
+| 3 | [FILL IN] | [FILL IN] |
+| 4 | [FILL IN] | [FILL IN] |
+| 5 | [FILL IN] | [FILL IN] |
 
-## Requirements
+---
 
-- Tested on JDK 11.
-- No Maven, no Gradle, no Spring, no external libraries. The system is pure JDK.
-- JUnit is used for tests only (`lib/junit-platform-console-standalone-1.10.2.jar`). The application itself compiles and runs with no external library.
+## Requirements and Prerequisites
 
-## How to run
+- **Java Development Kit (JDK):** Tested and verified on **JDK 11** (compatible with JDK 11+).
+- **Zero External Dependencies:** Built using standard Java SE libraries only. No Maven, no Gradle, no Spring, and no third-party runtime frameworks.
+- **Testing Dependency:** JUnit 5 standalone runner is included under `lib/junit-platform-console-standalone-1.10.2.jar` for running automated unit and integration tests only. The application itself compiles and runs using pure JDK.
 
-Run everything from the project root. The `.bat` scripts are the recommended way on Windows. The `javac` / `java` commands are a backup if the scripts do not run.
+---
 
-### A. Compile
+## System Architecture Overview
 
-Compiles `src/common`, `src/server` and `src/client` into `out`. Tests are not compiled here.
+The project is structured in a clean, decoupled **Client-Server Architecture**:
 
-Recommended:
+- **`src/common/`**: Shared domain models (`Employee`, `Customer`, `Product`, `Sale`), custom exception hierarchy (`ChainStoreException`), serialization protocol objects (`Request`, `Response`, `ServerEvent`), and utility classes (`PasswordHasher`, `AppConfig`, `IdGenerator`).
+- **`src/server/`**: Multi-threaded TCP server (`ChainServer`, `ClientHandler`), business command pattern dispatcher (`CommandFactory`), thread pool executor (`BusinessTaskExecutor`), domain services, chat queue manager (`ChatQueueManager`), report exporters (JSON and Word RTF), and binary file persistence repositories.
+- **`src/client/`**: Interactive text-based console interface (`ConsoleMain`), domain controllers (`InventoryController`, `CustomerController`, `ChatController`, etc.), asynchronous event dispatcher (`ClientEventDispatcher`), and socket connection layer (`ServerConnection`). A Swing GUI client is also available as an alternative frontend (`LoginFrame`).
+- **`src/test/`**: 90 comprehensive JUnit 5 tests verifying business logic, concurrency, persistence, socket communications, and design patterns.
 
-```
+---
+
+## How to Run
+
+All commands and scripts should be executed from the project root directory.
+
+### 1. Compile the System
+
+Compiles all source files into the `out/` folder:
+
+```bat
 compile.bat
 ```
 
-Manual backup:
-
-```
+*Manual backup command:*
+```bash
 mkdir out
 javac -encoding UTF-8 -d out -sourcepath src src/server/core/ChainServer.java src/client/console/ConsoleMain.java
 ```
 
-### B. Run the server
+### 2. Start the Server
 
-Start the server **before** any client. It listens on port **5000** (`server.port` in `config.properties`, default 5000 in `ChainServer`).
+Start the server **before** launching clients. By default, the server listens on port **5000** (configured in `config.properties`):
 
-Recommended:
-
-```
+```bat
 run_server.bat
 ```
 
-Manual backup:
-
-```
+*Manual backup command:*
+```bash
 java -cp out server.core.ChainServer
 ```
 
-Leave this window open.
+*Note:* On its initial startup, the server automatically creates the runtime directories (`data/`, `logs/`, `reports/`) and seeds initial demonstration employees and branch inventories (`DataSeeder`).
 
-The first run creates `data`, `logs` and `reports` if they are missing, and seeds demo employees plus starting inventory when those files are still empty (`DataSeeder`).
+### 3. Start the Console Clients (Run in 2 Separate Windows)
 
-### C. Run a client
+To demonstrate multi-branch operations and inter-branch live chat, run the client script **twice** in separate terminal windows:
 
-Run a client **twice, in two separate terminal windows**, so you can log in as Tel Aviv in one and Jerusalem in the other. That is how chat and live updates are checked.
-
-Recommended (run this twice):
-
-```
+```bat
 run_client.bat
 ```
 
-Each call opens an interactive console window.
-
-Manual backup (run once in each of two terminals):
-
-```
+*Manual backup command (execute once per terminal window):*
+```bash
 java -cp out client.console.ConsoleMain
 ```
 
-Host and port come from `config.properties` (`server.host=localhost`, `server.port=5000`).
+*(Optional Swing GUI Client: `run_client_gui.bat` or `java -cp out client.gui.LoginFrame`)*
 
-## Demo users
+---
 
-Log in with the **employee number** and password. All demo accounts are created by `DataSeeder` with the same password `Chain@2026` (stored hashed). There is no separate Admin role: a Shift Manager is the admin of the system.
+## Demonstration Accounts
 
-| Username | Password | Role | Branch |
-|---|---|---|---|
-| 1001 | Chain@2026 | Shift Manager | Tel Aviv |
-| 1002 | Chain@2026 | Cashier | Tel Aviv |
-| 2001 | Chain@2026 | Shift Manager | Jerusalem |
-| 2002 | Chain@2026 | Seller | Jerusalem |
+All demonstration accounts are seeded with the default password: **`Chain@2026`** (passwords are securely hashed using SHA-256 with individual salts).
 
-1001 is the Tel Aviv admin. 2002 is a Jerusalem seller. Cashier and Seller have the same permissions; Shift Manager also sees employee management, password policy, reports in JSON/Word, and can join an open chat.
+| Employee No | Password | Full Name | Role | Branch | Privileges |
+|---|---|---|---|---|---|
+| **1001** | `Chain@2026` | Maya Shir | Shift Manager (Admin) | Tel Aviv | Full access: Inventory, Customers, Chat, Employees, Password Policy, Reports (JSON/Word), Join active chats |
+| **1002** | `Chain@2026` | Ron Levi | Cashier | Tel Aviv | Branch inventory, sales, customer registration, branch chat |
+| **2001** | `Chain@2026` | Avi Dagan | Shift Manager (Admin) | Jerusalem | Full admin access for Jerusalem branch |
+| **2002** | `Chain@2026` | Tamar Ben Ari | Seller | Jerusalem | Branch inventory, sales, customer registration, branch chat |
 
-## What to test
+---
 
-1. **Login by role.** Log in as 1002 (Cashier): Inventory, Customers, Chat. Log in as 1001 (Shift Manager): the same options plus Employees, Password Policy, Reports and Admin Chat options.
-2. **Sale in one branch (Observer).** Sell a product in Tel Aviv. Stock updates at once for every client of Tel Aviv, not for Jerusalem.
-3. **Customer add/update.** Register or edit a customer. The change appears in every connected branch (the customer list is shared).
-4. **Customer kinds (Strategy).** New: 10% on the first purchase. Returning: 5%, or 8% on 3+ items. VIP: 15%, or 20% on orders above 500. The price comes from the subclass, not from an if on the type.
-5. **Chat (queue).** Open a conversation from Tel Aviv to Jerusalem while someone is free: the other window opens the chat. Then start a chat while the Jerusalem employee is already in a conversation: the request is kept in the queue. When that employee becomes free, the waiting side gets a notification (`CHAT_PEER_AVAILABLE`) and can try again. `ChatQueueManager` waits with `wait()` / `notifyAll()` for a short window (`chat.waitForPartnerMillis`, default 3000 ms); after that the request stays queued instead of holding a pool thread.
-6. **Join chat.** Only a Shift Manager can join an open conversation (Admin Chat menu). A Cashier or Seller cannot.
-7. **Duplicate login.** Log in as 1001, then try 1001 again in another window. The second login is rejected.
-8. **Threads.** Create an employee as 1001 and sell as 1002 at the same time. Neither action blocks the other. Optional: set `demo.taskDelayMillis=1500` in `config.properties` so overlapping `START` / `END` lines are easy to see on the server console.
-9. **Reports.** As a Shift Manager, build a report and export to JSON or Word (RTF file under `reports/`).
-10. **Logs.** View `logs/employees.log`, `logs/customers.log`, `logs/sales.log`, `logs/chat.log`. Each action type has its own file.
+## Step-by-Step Feature Walkthrough (All 10 Assignment Requirements)
 
-## Project structure
+### 1. Client-Server Architecture & Authentication (Requirements 1, 2)
+- Start the server, then launch a client.
+- Enter employee number `1002` and password `Chain@2026`. The client connects over TCP sockets using serialized objects.
+- Attempting to log in with an invalid password or non-existent user gives a clear refusal message.
+
+### 2. Role-Based Navigation (Requirement 4)
+- **Cashier/Seller (e.g. 1002):** Shows options 1–9 (Inventory, Sales, Customers, Chat). Administrative options are hidden.
+- **Shift Manager (e.g. 1001):** Shows extended options 10–17 (Add Products, View/Add Employees, Password Policy, Branch/Product Reports, Join Active Chats, View Logs).
+
+### 3. Branch Inventory & Restock (Requirement 5)
+- **View Inventory (Option 1):** Displays products and current stock specifically for the logged-in branch. Tel Aviv and Jerusalem maintain isolated stock levels.
+- **Restock Product (Option 3):** Simulates purchasing inventory from suppliers and increases product quantities.
+
+### 4. Customer Management & Strategy Pricing (Requirement 6)
+- **Customer Tiers:**
+  - `NewCustomer`: 10% welcome discount on the first purchase.
+  - `ReturningCustomer`: 5% permanent loyalty discount; 8% discount when purchasing 3 or more items.
+  - `VipCustomer`: 15% permanent discount; 20% discount on orders exceeding 500 NIS.
+- **Polymorphic Execution:** The sale calculation executes `customer.calculateFinalPrice(...)` without any `if/switch` checks on customer type.
+- **Automatic Tier Upgrade:** When thresholds are reached (1 purchase for Returning; 5 purchases or 1,000 NIS total spent for VIP), `CustomerFactory.upgradeIfNeeded()` automatically instantiates the upgraded subclass while preserving purchase history.
+- **Live Sync (Observer):** Registering or updating a customer in one client immediately broadcasts a `CUSTOMERS_UPDATED` event to all connected clients across the entire chain.
+
+### 5. Sales Reports & Export in JSON / Word (Requirement 7)
+- Log in as Shift Manager (`1001`).
+- **Sales by Branch (Option 14):** Aggregates sales count, items sold, revenue, and discounts per branch.
+- **Sales by Product (Option 15):** Generates product-level breakdown.
+- **JSON Export:** Writes structured JSON report files to `reports/` and prints the output directly in the console.
+- **Word Export:** Generates standard native Rich Text Format (`.rtf`) documents in `reports/`, opening seamlessly in Microsoft Word without format warnings.
+
+### 6. Employee Management & Password Policy (Requirements 3, 8)
+- **View/Add Employees (Options 11, 13):** Lists and creates employee accounts with full details (Name, National ID, Phone, Bank Account, Branch, Role).
+- **Password Policy (Option 12):** Shift managers can view and configure policy rules (minimum length, uppercase, lowercase, digit, special character). New employee passwords are validated against this policy before account creation.
+
+### 7. Inter-Branch Chat & Queue Management (Requirement 9)
+- **Live 1-on-1 Chat (Option 7 & 8):** Tel Aviv employee requests a chat with Jerusalem; the free Jerusalem employee receives an instant invitation and can enter the interactive chat room.
+- **Queue & Callback Notification:** If all employees in the target branch are busy, the request is placed into a server-side FIFO queue. When an employee becomes free, the server triggers a live `CHAT_PEER_AVAILABLE` notification to the requester.
+- **Shift Manager Join (Option 16):** Shift managers can view in-progress conversations and join them, automatically receiving the conversation history.
+- **Single Active Session Constraint:** An employee cannot participate in multiple simultaneous chats or log in concurrently from multiple terminals.
+
+### 8. System Activity Logs (Requirement 10)
+- Shift managers can inspect real-time log files directly via **Option 17**:
+  - `logs/employees.log`: Account creations and updates.
+  - `logs/customers.log`: Customer registrations and automatic tier promotions.
+  - `logs/sales.log`: Sales transactions and inventory restock operations.
+  - `logs/chat.log`: Metadata of inter-branch chat sessions (who talked to whom, branch, duration).
+
+---
+
+## Design Patterns and Technical Implementation
+
+| Design Pattern | Implementation Location | Purpose and Technical Value |
+|---|---|---|
+| **Observer** | `EventPublisher` (Server) / `ClientEventDispatcher`, `ServerEventListener` (Client) | Enables real-time server push events (inventory changes, customer updates, chat invitations) without client polling. |
+| **Strategy** | `Customer` hierarchy (`NewCustomer`, `ReturningCustomer`, `VipCustomer`) | Encapsulates pricing algorithms polymorphically inside customer subclasses. Adding a new customer tier requires no modifications to the sale processing code. |
+| **Factory** | `CustomerFactory`, `CommandFactory`, `ReportExporter` selection | Centralizes object creation and type upgrades based on business rules and action enums. |
+| **Command** | `server.command.Command` interface and 19 action implementations | Encapsulates each client request into a command object, centralizing permission checking, error handling, and audit logging in `ClientHandler`. |
+| **Singleton** | `SessionManager`, `LogManager`, `ClientRegistry`, `ServerContext`, `AppConfig`, `ChatService`, `ChatQueueManager` | Guarantees single points of state management (e.g. preventing duplicate logins and coordinating thread pools). |
+| **Monitor / Queue** | `ChatQueueManager` using `wait()` / `notifyAll()` and synchronized blocks | Coordinates thread waiting when finding free chat partners, falling back to a FIFO queue without blocking worker threads indefinitely. |
+
+---
+
+## Concurrency & Threading Mechanisms
+
+1. **Accept Loop:** `ChainServer` runs a non-blocking `accept()` loop spawning a dedicated `ClientHandler` thread per connection.
+2. **Fixed Business Thread Pool:** `BusinessTaskExecutor` bounds concurrent business operations via `Executors.newFixedThreadPool(4)` (configurable via `business.threadPool.size`).
+3. **Granular Synchronization:** Fine-grained synchronization on individual `Product` instances during sales, and separate lock objects per `LogCategory` in `LogWriter` to prevent bottlenecks across unrelated files.
+4. **Thread-Safe Collections:** Extensive use of `ConcurrentHashMap` and `CopyOnWriteArrayList` for active client sessions and event listeners.
+5. **Clean Thread Shutdown:** Volatile boolean flags (`isRunning`, `isHandlerRunning`) ensure graceful resource cleanup in `finally` blocks.
+6. **Parallelism Demonstration:** Setting `demo.taskDelayMillis=1500` in `config.properties` allows observing simultaneous interleaved operations on different pool threads directly in the server console.
+
+---
+
+## Automated Tests (JUnit 5)
+
+To run the complete suite of **90 automated unit and integration tests**:
+
+```bat
+run_tests.bat
+```
+
+Tests run in an isolated workspace (`test-workspace/`) to guarantee that test data never pollutes live demonstration files.
+
+---
+
+## Runtime Data Files
+
+All system data is stored locally via Java Object Serialization and UTF-8 text logs:
 
 ```
-src/
-  common/     Shared model, protocol, exceptions, utilities (serialized over the socket)
-  server/     Accept loop, commands, services, chat, reports, file storage
-  client/     Console CLI, controllers, connection, optional Swing GUI
-  test/       JUnit tests (compiled only by run_tests.bat)
+data/
+  employees.dat              # Serialized employee accounts & password hashes
+  customers.dat              # Shared chain customer records
+  sales.dat                  # Permanent transaction history
+  password_policy.dat        # System password validation rules
+  inventory_TEL_AVIV.dat     # Tel Aviv branch stock
+  inventory_JERUSALEM.dat    # Jerusalem branch stock
+logs/
+  employees.log, customers.log, sales.log, chat.log
+reports/
+  *.rtf, *.json              # Generated Word RTF and JSON export files
 ```
 
-## Design patterns and key decisions
-
-| Pattern | Where |
-|---|---|
-| Observer | `EventPublisher` on the server, `ClientEventDispatcher` / `ServerEventListener` on the client. Inventory events go to one branch. Customer events go to every client. |
-| Singleton | `SessionManager`, `LogManager`, `ClientRegistry`, `ServerContext`, `AppConfig`, `ChatService`, `ChatQueueManager`, `EventPublisher`, `ClientSession` |
-| Strategy | `Customer` with `NewCustomer`, `ReturningCustomer`, `VipCustomer` (each kind has its own price calculation) |
-| Factory | `CustomerFactory`, `CommandFactory`, report exporter selection |
-| Command | `server.command.Command` and the action classes under `server/command/impl` |
-| Chat queue | Monitor: `wait()` / `notifyAll()` plus a FIFO waiting list in `ChatQueueManager` |
-
-Customer kind changes (`CustomerFactory`):
-
-- New becomes Returning after the first completed purchase.
-- Returning becomes VIP after 5 purchases **or** 1000 total spent, whichever comes first (`customer.vip.minPurchases` and `customer.vip.minTotalSpent` in `config.properties`).
-- The object is replaced with a new instance of the next class. The kind is the class, not a field.
-
-Word and JSON export:
-
-- Reports are written as **RTF** (`.rtf`) by `WordRtfExporter` and as **JSON** (`.json`) by `JsonExporter`, using only JDK file writing.
-- No Apache POI or external library. Word opens RTF natively without warnings.
-
-## Data files
-
-Created at runtime under the folder the server was started from (usually the project root). There is no database. State is Java object serialization. Logs are plain text.
-
-```
-data/      employees.dat, customers.dat, sales.dat, password_policy.dat,
-           inventory_TEL_AVIV.dat, inventory_JERUSALEM.dat
-logs/      employees.log, customers.log, sales.log, chat.log
-reports/   sales_by_branch_<timestamp>.rtf (and .json), same for sales_by_product
-```
-
-To start clean, delete `data` and `logs`. The next server start seeds the demo employees and inventory again.
+To reset the system to fresh demonstration data, simply delete the `data/` and `logs/` folders; the server will re-seed all initial records upon the next startup.
