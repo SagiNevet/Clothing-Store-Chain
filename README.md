@@ -11,8 +11,8 @@ A distributed Java client, server enterprise platform for managing multi branch 
 | 1 | Teva Jalink | 208181446 |
 | 2 | Michelle Aizikovich | 317868172 |
 | 3 | Sagi Nevet | 314618166 |
-| 4 | Roey Biran | 318871035 |
-| 5 | Noam Shani | 315758839 |
+| 4 |  |  |
+| 5 |  |  |
 | 6 |  |  |
 
 ***
