@@ -10,9 +10,10 @@ A Java client-server console-based system for managing a clothing store retail c
 |---|---|---|
 | 1 | Teva Jalink | 208181446 |
 | 2 | Michelle Aizikovich | 317868172 |
-| 3 | [FILL IN] | [FILL IN] |
+| 3 | Sagi Nevet | 314618166 |
 | 4 | [FILL IN] | [FILL IN] |
 | 5 | [FILL IN] | [FILL IN] |
+| 6 | [FILL IN] | [FILL IN] |
 
 ---
 
