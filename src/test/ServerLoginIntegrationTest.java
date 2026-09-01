@@ -25,49 +25,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Starts a real server on a port of its own and drives it through real sockets.
- * <p>
- * These are integration tests rather than unit tests: they prove that the
- * accept loop, the thread per client, the object streams, the command factory
- * and the session table all work together. The duplicate login rule in
- * particular cannot be proven any other way, because it only means anything
- * when two separate connections exist at the same moment.
- * </p>
- * <p>
- * The server runs on port {@value #TEST_PORT} so that it never collides with a
- * server the group left running on the normal port.
- * </p>
- */
 public class ServerLoginIntegrationTest {
 
-    /** The port used by the test server. */
     private static final int TEST_PORT = 5051;
 
-    /** How long a client waits for an answer before the test gives up. */
     private static final int RESPONSE_TIMEOUT_MILLIS = 5000;
 
-    /** How long the test waits for the server to start listening. */
     private static final int STARTUP_TIMEOUT_MILLIS = 5000;
 
-    /** The employee number of the demonstration shift manager of Tel Aviv. */
     private static final String MANAGER_NUMBER = "1001";
 
-    /** The employee number of the demonstration cashier of Tel Aviv. */
     private static final String CASHIER_NUMBER = "1002";
 
-    /** The server under test. */
     private static ChainServer server;
 
-    /** The thread the blocking accept loop runs on. */
     private static Thread serverThread;
 
-    /**
-     * Starts the server once for the whole test class and waits until it is
-     * really accepting connections.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     @BeforeAll
     public static void startServer() throws InterruptedException {
         server = new ChainServer(TEST_PORT);
@@ -84,11 +57,6 @@ public class ServerLoginIntegrationTest {
         waitUntilServerAcceptsConnections();
     }
 
-    /**
-     * Stops the server after every test of the class has finished.
-     *
-     * @throws InterruptedException if the wait for the thread is interrupted
-     */
     @AfterAll
     public static void stopServer() throws InterruptedException {
         server.stop();
@@ -131,8 +99,6 @@ public class ServerLoginIntegrationTest {
             Response unknownUserResponse = client.login("9999", "NotThePassword1");
             assertFalse(unknownUserResponse.isSuccess());
 
-            // The two answers must be identical, otherwise the error message
-            // itself would reveal which employee numbers exist.
             assertEquals(wrongPasswordResponse.getMessage(), unknownUserResponse.getMessage());
         }
     }
@@ -174,11 +140,9 @@ public class ServerLoginIntegrationTest {
     public void aDroppedConnectionReleasesTheSession() throws Exception {
         TestClient crashingComputer = new TestClient();
         assertTrue(crashingComputer.login(CASHIER_NUMBER, DataSeeder.getDemoPassword()).isSuccess());
-        // Simulates a client that was killed instead of logging out properly.
+        
         crashingComputer.close();
 
-        // The server notices the closed socket on its own thread, so the test
-        // gives it a moment before checking that the session was released.
         Response secondLogin = loginWithRetry(CASHIER_NUMBER);
 
         assertTrue(secondLogin.isSuccess(),
@@ -215,14 +179,6 @@ public class ServerLoginIntegrationTest {
         }
     }
 
-    /**
-     * Tries to log in several times, giving the server a moment to notice a
-     * connection that was dropped without a logout.
-     *
-     * @param employeeNumber the employee to log in
-     * @return the last answer received from the server
-     * @throws Exception if the connection itself fails
-     */
     private Response loginWithRetry(String employeeNumber) throws Exception {
         Response lastResponse = null;
         for (int attempt = 0; attempt < 20; attempt++) {
@@ -237,12 +193,6 @@ public class ServerLoginIntegrationTest {
         return lastResponse;
     }
 
-    /**
-     * Waits until the server answers a connection attempt, so the tests never
-     * start before the accept loop is ready.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     private static void waitUntilServerAcceptsConnections() throws InterruptedException {
         long deadline = System.currentTimeMillis() + STARTUP_TIMEOUT_MILLIS;
         while (System.currentTimeMillis() < deadline) {
@@ -255,71 +205,33 @@ public class ServerLoginIntegrationTest {
         fail("The test server did not start listening on port " + TEST_PORT);
     }
 
-    /**
-     * A very small client used by the tests: it opens a socket, sends requests
-     * and reads the answers.
-     * <p>
-     * It reads the answers on the calling thread, which is enough for these
-     * tests because every request here has exactly one answer and no events are
-     * pushed yet. The real client of stage 3 will read on a separate thread.
-     * </p>
-     */
     private static final class TestClient implements AutoCloseable {
 
-        /** The socket connected to the test server. */
         private final Socket socket;
 
-        /** The stream used to send requests. */
         private final ObjectOutputStream outputStream;
 
-        /** The stream used to read answers. */
         private final ObjectInputStream inputStream;
 
-        /**
-         * Connects to the test server.
-         *
-         * @throws IOException if the connection cannot be opened
-         */
         private TestClient() throws IOException {
             this.socket = new Socket("localhost", TEST_PORT);
             this.socket.setSoTimeout(RESPONSE_TIMEOUT_MILLIS);
-            // Same order as the server: output first and flushed, then input.
+            
             this.outputStream = new ObjectOutputStream(socket.getOutputStream());
             this.outputStream.flush();
             this.inputStream = new ObjectInputStream(socket.getInputStream());
         }
 
-        /**
-         * Sends a login request.
-         *
-         * @param employeeNumber the employee number to send
-         * @param password       the password to send
-         * @return the answer of the server
-         * @throws Exception if the connection fails
-         */
         private Response login(String employeeNumber, String password) throws Exception {
             return send(new Request(ActionType.LOGIN)
                     .withParameter(ProtocolKeys.EMPLOYEE_NUMBER, employeeNumber)
                     .withParameter(ProtocolKeys.PASSWORD, password));
         }
 
-        /**
-         * Sends a logout request.
-         *
-         * @return the answer of the server
-         * @throws Exception if the connection fails
-         */
         private Response logout() throws Exception {
             return send(new Request(ActionType.LOGOUT));
         }
 
-        /**
-         * Sends one request and waits for its answer.
-         *
-         * @param request the request to send
-         * @return the answer of the server
-         * @throws Exception if the connection fails or the answer never arrives
-         */
         private Response send(Request request) throws Exception {
             outputStream.writeObject(request);
             outputStream.flush();
@@ -332,7 +244,6 @@ public class ServerLoginIntegrationTest {
             try {
                 socket.close();
             } catch (IOException ignoredFailure) {
-                // The test is finished with this connection anyway.
             }
         }
     }

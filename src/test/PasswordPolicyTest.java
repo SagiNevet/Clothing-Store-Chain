@@ -13,12 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests the password policy rules and the hashing of passwords.
- */
 public class PasswordPolicyTest {
 
-    /** A policy demanding eight characters with a digit and both letter cases. */
     private final PasswordPolicy defaultPolicy = PasswordPolicy.createDefault();
 
     @Test
@@ -52,9 +48,7 @@ public class PasswordPolicyTest {
     @Test
     @DisplayName("Every violation is reported at once, not one at a time")
     public void allViolationsAreReportedTogether() {
-        // "abc" breaks three rules: it is too short, it has no digit and it has
-        // no capital letter. The exception must carry all three so the screen
-        // can show the user everything that is wrong in one message.
+
         InvalidPasswordPolicyException failure = assertThrows(
                 InvalidPasswordPolicyException.class,
                 () -> defaultPolicy.validate("abc"));

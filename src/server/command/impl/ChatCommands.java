@@ -15,37 +15,13 @@ import server.core.ConnectedClient;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The five commands of the chat feature, gathered in one file.
- * <p>
- * Each of them is a tiny class whose only job is to read the parameters of a
- * request and call {@link ChatService}. Keeping them together makes the whole
- * feature readable at a glance, which is worth more here than one file per
- * class: not one of them is longer than a dozen lines.
- * </p>
- */
 public final class ChatCommands {
 
-    /**
-     * Prevents instantiation. This class only groups the command classes.
-     */
     private ChatCommands() {
     }
 
-    /**
-     * Asks to open a conversation with a free employee of another branch.
-     * <p>
-     * When nobody is free, {@code ChatService} throws
-     * {@code ChatUnavailableException} with its queued flag raised, and the
-     * handler turns that into a failed response whose message tells the user
-     * they are in the queue. Nothing is lost: the request stays in the queue.
-     * </p>
-     */
     public static class RequestChat implements Command {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Response execute(Request request, ConnectedClient client)
                 throws ChainStoreException {
@@ -63,14 +39,8 @@ public final class ChatCommands {
         }
     }
 
-    /**
-     * Sends one message inside an open conversation.
-     */
     public static class SendMessage implements Command {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Response execute(Request request, ConnectedClient client)
                 throws ChainStoreException {
@@ -85,15 +55,8 @@ public final class ChatCommands {
         }
     }
 
-    /**
-     * Lets a shift manager join a conversation that is already open, and hands
-     * back everything that was said before they arrived.
-     */
     public static class JoinChat implements Command {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Response execute(Request request, ConnectedClient client)
                 throws ChainStoreException {
@@ -107,14 +70,8 @@ public final class ChatCommands {
         }
     }
 
-    /**
-     * Closes a conversation and frees both employees.
-     */
     public static class CloseChat implements Command {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Response execute(Request request, ConnectedClient client)
                 throws ChainStoreException {
@@ -126,15 +83,8 @@ public final class ChatCommands {
         }
     }
 
-    /**
-     * Returns the conversations that are open right now, so a shift manager can
-     * choose one to join.
-     */
     public static class ListOpenChats implements Command {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Response execute(Request request, ConnectedClient client)
                 throws ChainStoreException {

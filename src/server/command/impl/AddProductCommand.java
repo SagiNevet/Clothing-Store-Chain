@@ -14,18 +14,8 @@ import server.core.ServerContext;
 import server.observer.EventPublisher;
 import server.service.LogManager;
 
-/**
- * Adds a brand new product to the catalogue of a branch.
- * <p>
- * Restricted to a shift manager by {@code ActionType.ADD_PRODUCT}, because a
- * new catalogue entry is a management decision rather than a daily operation.
- * </p>
- */
 public class AddProductCommand implements Command {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Response execute(Request request, ConnectedClient client) throws ChainStoreException {
         Branch branch = client.getBranch();

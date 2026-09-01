@@ -16,23 +16,8 @@ import server.service.LogManager;
 
 import java.util.ArrayList;
 
-/**
- * Registers a new customer of the chain.
- * <p>
- * Any employee may do this, because registering a customer is part of the daily
- * work of a cashier and a seller.
- * </p>
- * <p>
- * The new customer is pushed to <b>every</b> connected employee of both
- * branches, which is the requirement that the customer list stays identical
- * across the whole chain without anybody pressing refresh.
- * </p>
- */
 public class AddCustomerCommand implements Command {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Response execute(Request request, ConnectedClient client) throws ChainStoreException {
         String idNumber = request.getString(ProtocolKeys.CUSTOMER_ID);

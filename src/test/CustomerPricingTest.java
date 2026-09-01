@@ -14,20 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests the three purchase plans and the movement of a customer from one kind
- * to another.
- * <p>
- * These are the most important tests of the project, because the purchase plans
- * are where the polymorphism requirement is implemented.
- * </p>
- */
 public class CustomerPricingTest {
 
-    /** The tolerance used when comparing money amounts held in a double. */
     private static final double MONEY_TOLERANCE = 0.001;
 
-    /** A price used by several tests. */
     private static final double SHIRT_PRICE = 100.0;
 
     @Test
@@ -97,9 +87,6 @@ public class CustomerPricingTest {
         Customer returningCustomer = new ReturningCustomer("222", "Yossi", "050-2222222", 1, 90.0);
         Customer vipCustomer = new VipCustomer("333", "Rina", "050-3333333", 6, 1200.0);
 
-        // This is the polymorphism the project is graded on: the very same call
-        // on three different objects runs three different purchase plans, and
-        // the calling code does not ask any of them what kind of customer it is.
         double priceForNew = newCustomer.calculateFinalPrice(SHIRT_PRICE, 2);
         double priceForReturning = returningCustomer.calculateFinalPrice(SHIRT_PRICE, 2);
         double priceForVip = vipCustomer.calculateFinalPrice(SHIRT_PRICE, 2);
@@ -165,8 +152,6 @@ public class CustomerPricingTest {
 
         Customer upgradedCustomer = CustomerFactory.upgradeIfNeeded(customer);
 
-        // equals compares the identity number only, so a list holding the old
-        // object can locate it and replace it with the upgraded one.
         assertEquals(customer, upgradedCustomer);
         assertEquals(customer.hashCode(), upgradedCustomer.hashCode());
     }

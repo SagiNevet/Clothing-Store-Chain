@@ -16,20 +16,8 @@ import server.service.LogManager;
 
 import java.util.ArrayList;
 
-/**
- * Updates the name and the phone number of an existing customer.
- * <p>
- * Notice what cannot be updated here: the kind of the customer. New, returning
- * and VIP are decided only by the purchase history through
- * {@code CustomerFactory}, so no employee can hand out a VIP discount by
- * editing a field.
- * </p>
- */
 public class UpdateCustomerCommand implements Command {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Response execute(Request request, ConnectedClient client) throws ChainStoreException {
         String idNumber = request.getString(ProtocolKeys.CUSTOMER_ID);

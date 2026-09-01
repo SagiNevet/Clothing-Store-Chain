@@ -35,16 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Text-based console interface for the clothing store chain client.
- * <p>
- * Provides full CLI navigation for all 10 requirements of the course project:
- * authentication, branch inventory & sales, customer management with Strategy
- * pricing, employee administration & password policies, JSON and Word report
- * exports, real-time live events via Observer, and multi-branch chat with queue
- * management.
- * </p>
- */
 public class ConsoleMain implements ServerEventListener {
 
     private final LoginController loginController = new LoginController();
@@ -67,7 +57,6 @@ public class ConsoleMain implements ServerEventListener {
     public void run() {
         printBanner();
 
-        // Subscribe this console instance to live server events (Observer pattern)
         ClientSession.getInstance().getConnection().getEventDispatcher().subscribe(this);
 
         boolean running = true;
@@ -88,12 +77,12 @@ public class ConsoleMain implements ServerEventListener {
     private void printBanner() {
         System.out.println("========================================================================");
         System.out.println("       CLOTHING STORE CHAIN MANAGEMENT SYSTEM - CONSOLE CLIENT          ");
-        System.out.println("       HIT - Java Algorithms & OOP Course - Summer 2026                 ");
+        System.out.println("       Enterprise Multi-Branch Retail Management Platform               ");
         System.out.println("========================================================================");
     }
 
     private boolean handleLoginMenu() {
-        System.out.println("\n--- LOGIN ---");
+        System.out.println("\n=== LOGIN ===");
         System.out.println("Demo accounts: 1001 (Tel Aviv Shift Manager), 1002 (Tel Aviv Cashier)");
         System.out.println("               2001 (Jerusalem Shift Manager), 2002 (Jerusalem Seller)");
         System.out.println("Default Password for all: Chain@2026");
@@ -132,11 +121,11 @@ public class ConsoleMain implements ServerEventListener {
     private void handleMainMenu() {
         boolean isShiftManager = currentEmployee.getRole().canManageEmployees();
 
-        System.out.println("\n------------------------------------------------------------------------");
-        System.out.println(" MAIN MENU - Branch: " + currentEmployee.getBranch().getDisplayName()
+        System.out.println("\n========================================================================");
+        System.out.println(" MAIN MENU, Branch: " + currentEmployee.getBranch().getDisplayName()
                 + " | User: " + currentEmployee.getFullName()
                 + " (" + currentEmployee.getRole().getDisplayName() + ")");
-        System.out.println("------------------------------------------------------------------------");
+        System.out.println("========================================================================");
         System.out.println("  1. View Branch Inventory");
         System.out.println("  2. Sell Product to Customer (Polymorphic Strategy Pricing)");
         System.out.println("  3. Restock Product (Purchase from Supplier)");
@@ -148,7 +137,7 @@ public class ConsoleMain implements ServerEventListener {
         System.out.println("  9. Close Active Chat Session");
 
         if (isShiftManager) {
-            System.out.println("  --- Shift Manager / Admin Operations ---");
+            System.out.println("  *** Shift Manager / Admin Operations ***");
             System.out.println(" 10. Add New Product to Catalogue");
             System.out.println(" 11. View All Chain Employees");
             System.out.println(" 12. Add New Employee Account");
@@ -230,9 +219,7 @@ public class ConsoleMain implements ServerEventListener {
         System.out.println("[Error] Invalid option selected. Please choose a number from the menu.");
     }
 
-    // =========================================================================
-    // 1. INVENTORY OPERATIONS
-    // =========================================================================
+    // 1. inventory operations
 
     private void viewInventory() {
         try {
@@ -240,7 +227,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("=== INVENTORY FOR BRANCH: " + currentEmployee.getBranch().getDisplayName() + " ===");
             System.out.printf("%-10s | %-25s | %-15s | %-10s | %-8s\n",
                     "Product ID", "Product Name", "Category", "Price (NIS)", "Stock");
-            System.out.println("-----------------------------------------------------------------------------");
+            System.out.println("=============================================================================");
             for (Product p : inventory) {
                 System.out.printf("%-10s | %-25s | %-15s | %-10.2f | %-8d\n",
                         p.getProductId(), p.getName(), p.getCategory().getDisplayName(),
@@ -266,7 +253,7 @@ public class ConsoleMain implements ServerEventListener {
             Sale sale = inventoryController.sellProduct(productId, quantity, customerId);
 
             System.out.println("\n[SALE SUCCESSFUL!]");
-            System.out.println("--------------------------------------------------");
+            System.out.println("==================================================");
             System.out.println("Sale ID:          " + sale.getSaleId());
             System.out.println("Product:          " + sale.getProductName() + " (x" + sale.getQuantity() + ")");
             System.out.println("Catalogue Price:  " + String.format("%.2f NIS", sale.getUnitPrice() * sale.getQuantity()));
@@ -275,7 +262,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("Discount Applied: " + String.format("%.2f NIS", sale.getDiscountAmount()));
             System.out.println("Final Paid Price: " + String.format("%.2f NIS", sale.getFinalPrice()));
             System.out.println("Timestamp:        " + sale.getSaleTime());
-            System.out.println("--------------------------------------------------");
+            System.out.println("==================================================");
             System.out.println("The sale was processed polymorphically according to the customer strategy plan.");
         } catch (NumberFormatException e) {
             System.err.println("[Error] Invalid quantity number.");
@@ -335,9 +322,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // 2. CUSTOMER OPERATIONS
-    // =========================================================================
+    // 2. customer operations
 
     private void viewCustomers() {
         try {
@@ -345,7 +330,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("=== CHAIN CUSTOMERS (Shared across all branches) ===");
             System.out.printf("%-12s | %-20s | %-14s | %-10s | %-9s | %-12s | %s\n",
                     "ID Number", "Full Name", "Phone", "Type", "Purchases", "Total Spent", "Discount Plan");
-            System.out.println("----------------------------------------------------------------------------------------------------------------");
+            System.out.println("================================================================================================================");
             for (Customer c : customers) {
                 System.out.printf("%-12s | %-20s | %-14s | %-10s | %-9d | %-12.2f | %s\n",
                         c.getIdNumber(), c.getFullName(), c.getPhone(),
@@ -395,9 +380,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // 3. CHAT OPERATIONS
-    // =========================================================================
+    // 3. chat operations
 
     private void startChat() {
         Branch targetBranch = (currentEmployee.getBranch() == Branch.TEL_AVIV)
@@ -498,11 +481,11 @@ public class ConsoleMain implements ServerEventListener {
             activeChatSessionId = chosen.getSessionId();
 
             System.out.println("\n[JOINED CHAT SESSION: " + activeChatSessionId + "]");
-            System.out.println("--- Conversation History Prior to Joining ---");
+            System.out.println("=== Conversation History Prior to Joining ===");
             for (ChatMessage msg : history) {
                 System.out.println("[" + msg.getSentAt() + "] " + msg.getSenderFullName() + ": " + msg.getContent());
             }
-            System.out.println("----------------------------------------------");
+            System.out.println("==============================================");
 
             enterChatRoom();
         } catch (Exception e) {
@@ -510,9 +493,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // 4. EMPLOYEE & ADMIN OPERATIONS (Shift Manager)
-    // =========================================================================
+    // 4. employee & admin operations (shift manager)
 
     private void viewEmployees() {
         try {
@@ -520,7 +501,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("=== CHAIN EMPLOYEES ===");
             System.out.printf("%-12s | %-18s | %-12s | %-14s | %-15s | %-12s | %s\n",
                     "Employee No", "Full Name", "ID Number", "Phone", "Bank Account", "Branch", "Role");
-            System.out.println("---------------------------------------------------------------------------------------------------------");
+            System.out.println("=========================================================================================================");
             for (Employee emp : employees) {
                 System.out.printf("%-12s | %-18s | %-12s | %-14s | %-15s | %-12s | %s\n",
                         emp.getEmployeeNumber(), emp.getFullName(), emp.getIdNumber(),
@@ -585,7 +566,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("3. Require Lowercase Letter:   " + policy.isLowerCaseLetterRequired());
             System.out.println("4. Require Digit:              " + policy.isDigitRequired());
             System.out.println("5. Require Special Character:  " + policy.isSpecialCharacterRequired());
-            System.out.println("----------------------------------");
+            System.out.println("==================================");
             System.out.print("Do you want to update the policy? (y/n): ");
             String answer = scanner.nextLine().trim();
             if (!answer.equalsIgnoreCase("y")) {
@@ -615,9 +596,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // 5. REPORTS OPERATIONS (Shift Manager)
-    // =========================================================================
+    // 5. reports operations (shift manager)
 
     private void salesByBranchReport() {
         try {
@@ -625,7 +604,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("=== SALES BY BRANCH REPORT ===");
             System.out.printf("%-15s | %-10s | %-10s | %-14s | %-14s\n",
                     "Branch", "Sales Count", "Items Sold", "Revenue (NIS)", "Discounts (NIS)");
-            System.out.println("--------------------------------------------------------------------------");
+            System.out.println("==========================================================================");
             for (ReportRow row : rows) {
                 System.out.printf("%-15s | %-10d | %-10d | %-14.2f | %-14.2f\n",
                         row.getGroupName(), row.getNumberOfSales(), row.getItemsSold(),
@@ -644,7 +623,7 @@ public class ConsoleMain implements ServerEventListener {
             System.out.println("=== SALES BY PRODUCT REPORT ===");
             System.out.printf("%-20s | %-10s | %-10s | %-14s | %-14s\n",
                     "Product", "Sales Count", "Items Sold", "Revenue (NIS)", "Discounts (NIS)");
-            System.out.println("--------------------------------------------------------------------------");
+            System.out.println("==========================================================================");
             for (ReportRow row : rows) {
                 System.out.printf("%-20s | %-10d | %-10d | %-14.2f | %-14.2f\n",
                         row.getGroupName(), row.getNumberOfSales(), row.getItemsSold(),
@@ -674,9 +653,9 @@ public class ConsoleMain implements ServerEventListener {
                 System.out.println("[JSON EXPORT SUCCESSFUL] File generated at: " + path);
                 File jsonFile = new File(path);
                 if (jsonFile.exists()) {
-                    System.out.println("--- Generated JSON Content ---");
+                    System.out.println("=== Generated JSON Content ===");
                     System.out.println(new String(Files.readAllBytes(jsonFile.toPath()), StandardCharsets.UTF_8));
-                    System.out.println("------------------------------");
+                    System.out.println("==============================");
                 }
             } catch (Exception e) {
                 System.err.println("[Export Failed] " + e.getMessage());
@@ -684,9 +663,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // 6. SYSTEM LOGS (Shift Manager)
-    // =========================================================================
+    // 6. system logs (shift manager)
 
     private void viewLogs() {
         System.out.println("=== SYSTEM LOG FILES ===");
@@ -713,7 +690,7 @@ public class ConsoleMain implements ServerEventListener {
             return;
         }
 
-        System.out.println("\n--- CONTENTS OF " + fileName + " ---");
+        System.out.println("\n=== CONTENTS OF " + fileName + " ===");
         try {
             List<String> lines = Files.readAllLines(logFile.toPath(), StandardCharsets.UTF_8);
             int start = Math.max(0, lines.size() - 25);
@@ -726,12 +703,10 @@ public class ConsoleMain implements ServerEventListener {
         } catch (IOException e) {
             System.err.println("[Error reading log file] " + e.getMessage());
         }
-        System.out.println("----------------------------------\n");
+        System.out.println("==================================\n");
     }
 
-    // =========================================================================
-    // 7. LOGOUT
-    // =========================================================================
+    // 7. logout
 
     private void logout() {
         try {
@@ -745,9 +720,7 @@ public class ConsoleMain implements ServerEventListener {
         }
     }
 
-    // =========================================================================
-    // OBSERVER PATTERN - ServerEventListener Implementation
-    // =========================================================================
+    // observer pattern - servereventlistener implementation
 
     @Override
     public void onServerEvent(ServerEvent event) {

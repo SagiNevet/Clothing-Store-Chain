@@ -21,42 +21,18 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
-/**
- * The customers screen: the list shared by the whole chain.
- * <p>
- * <b>Two requirements meet in this one screen.</b>
- * </p>
- * <ul>
- *   <li>The list is <b>shared by every branch</b>, so a customer registered in
- *       Tel Aviv appears immediately in the window of an employee in Jerusalem.
- *       That is why the server pushes {@link EventType#CUSTOMERS_UPDATED} to
- *       everybody rather than to one branch.</li>
- *   <li>The last column shows the <b>purchase plan of each customer</b>, filled
- *       by a single polymorphic call. Selling to a new customer five times and
- *       watching the kind and the plan change by themselves is the clearest way
- *       to demonstrate the customer hierarchy during the defence.</li>
- * </ul>
- */
 public class CustomersPanel extends ServerBackedPanel {
 
-    /** Serialization version, required because Swing components are serializable. */
     private static final long serialVersionUID = 1L;
 
-    /** The data behind the table. */
     private final transient CustomerTableModel tableModel = new CustomerTableModel();
 
-    /** The table showing the customers. */
     private final JTable customersTable = new JTable(tableModel);
 
-    /** The line at the bottom reporting what happened. */
     private final JLabel statusLabel = new JLabel(" ");
 
-    /** The controller that performs the customer actions. */
     private final transient CustomerController customerController = new CustomerController();
 
-    /**
-     * Builds the customers screen and loads the list.
-     */
     public CustomersPanel() {
         super(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -71,11 +47,6 @@ public class CustomersPanel extends ServerBackedPanel {
         refreshCustomers();
     }
 
-    /**
-     * Builds the row of buttons above the table.
-     *
-     * @return the toolbar panel
-     */
     private JPanel createToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -94,9 +65,6 @@ public class CustomersPanel extends ServerBackedPanel {
         return toolbar;
     }
 
-    /**
-     * Loads the customer list from the server.
-     */
     private void refreshCustomers() {
         runInBackground("customers-refresh", () -> {
             List<Customer> customers = customerController.loadCustomers();
@@ -107,9 +75,6 @@ public class CustomersPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Asks for the details of a new customer and registers it.
-     */
     private void openAddCustomerDialog() {
         JTextField idNumberField = new JTextField();
         JTextField fullNameField = new JTextField();
@@ -145,9 +110,6 @@ public class CustomersPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Asks for a new name and phone number of the selected customer.
-     */
     private void openEditCustomerDialog() {
         Customer selectedCustomer = getSelectedCustomer();
         if (selectedCustomer == null) {
@@ -182,11 +144,6 @@ public class CustomersPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Returns the customer selected in the table, complaining when none is.
-     *
-     * @return the selected customer, or {@code null} when nothing is selected
-     */
     private Customer getSelectedCustomer() {
         int selectedRow = customersTable.getSelectedRow();
         if (selectedRow < 0) {
@@ -197,15 +154,6 @@ public class CustomersPanel extends ServerBackedPanel {
         return tableModel.getCustomerAt(modelRow);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Called on the Swing thread by the dispatcher. The customer event carries
-     * the whole list, because a single sale can change two things at once - the
-     * history of the buyer and, when a threshold is passed, the class of the
-     * object representing that buyer.
-     * </p>
-     */
     @Override
     @SuppressWarnings("unchecked")
     public void onServerEvent(ServerEvent event) {
@@ -221,11 +169,6 @@ public class CustomersPanel extends ServerBackedPanel {
         showStatus("The customer list was updated: " + updatedCustomers.size() + " customers");
     }
 
-    /**
-     * Writes a line in the status area.
-     *
-     * @param message the text to show
-     */
     private void showStatus(String message) {
         statusLabel.setText(message);
     }

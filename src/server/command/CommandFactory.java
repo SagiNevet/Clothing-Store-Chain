@@ -21,48 +21,13 @@ import server.command.impl.UpdatePasswordPolicyCommand;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * Builds the table that maps every {@link ActionType} to the command that
- * performs it.
- * <p>
- * This class is the <b>Factory</b> pattern of the server side. The handler asks
- * it for "the command of this action" and receives a ready object; it never
- * mentions a concrete command class, and it contains no {@code switch} on the
- * action type.
- * </p>
- * <p>
- * The table is an {@link EnumMap}, which is the natural structure when the key
- * is an enum: internally it is a plain array indexed by the position of the
- * constant, so a lookup costs an array access and no hashing at all.
- * </p>
- * <p>
- * The commands are created once, when the class is loaded, and shared by every
- * client thread. That is safe because a command holds no state of its own - all
- * the data it needs arrives in the {@code Request} of the caller. A command
- * that kept a field per request would have to be created per request instead.
- * </p>
- */
 public final class CommandFactory {
 
-    /** The single table of commands, filled once when the class is loaded. */
     private static final Map<ActionType, Command> COMMANDS = createCommandTable();
 
-    /**
-     * Prevents instantiation. This class only exposes static methods.
-     */
     private CommandFactory() {
     }
 
-    /**
-     * Builds the table of commands.
-     * <p>
-     * Actions that belong to later stages of the project are not in the table
-     * yet, and asking for one produces a clear business failure instead of a
-     * {@code NullPointerException}.
-     * </p>
-     *
-     * @return the table mapping each supported action to its command
-     */
     private static Map<ActionType, Command> createCommandTable() {
         Map<ActionType, Command> commandTable = new EnumMap<>(ActionType.class);
 
@@ -90,8 +55,6 @@ public final class CommandFactory {
         commandTable.put(ActionType.GET_ACTIVE_CHATS, new ChatCommands.ListOpenChats());
         commandTable.put(ActionType.CHAT_CALLBACK, new ChatCommands.RequestChat());
 
-        // One command builds every kind of report, and one exports it. The kind
-        // of report travels as a parameter, so a new report costs one enum value.
         ReportCommands.BuildReport buildReport = new ReportCommands.BuildReport();
         commandTable.put(ActionType.SALES_BY_BRANCH_REPORT, buildReport);
         commandTable.put(ActionType.SALES_BY_PRODUCT_REPORT, buildReport);
@@ -100,13 +63,6 @@ public final class CommandFactory {
         return commandTable;
     }
 
-    /**
-     * Returns the command that performs an action.
-     *
-     * @param actionType the action requested by the client
-     * @return the command object that performs it
-     * @throws ChainStoreException if the server does not support that action
-     */
     public static Command commandFor(ActionType actionType) throws ChainStoreException {
         Command command = COMMANDS.get(actionType);
         if (command == null) {
@@ -116,12 +72,6 @@ public final class CommandFactory {
         return command;
     }
 
-    /**
-     * Indicates whether an action is already implemented.
-     *
-     * @param actionType the action to check
-     * @return {@code true} if a command exists for that action
-     */
     public static boolean isSupported(ActionType actionType) {
         return COMMANDS.containsKey(actionType);
     }

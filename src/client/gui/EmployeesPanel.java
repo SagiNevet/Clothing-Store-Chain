@@ -29,46 +29,22 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
-/**
- * The employee management screen, available to a shift manager only.
- * <p>
- * It does the two things the requirements ask of the administration screen:
- * creating employee accounts, and defining the password policy those accounts
- * must satisfy.
- * </p>
- * <p>
- * <b>This screen is one half of the parallelism demonstration.</b> Creating an
- * account here and selling a shirt in another window are handed to two
- * different threads of the business pool, and the server console prints both
- * with overlapping timestamps.
- * </p>
- */
 public class EmployeesPanel extends ServerBackedPanel {
 
-    /** Serialization version, required because Swing components are serializable. */
     private static final long serialVersionUID = 1L;
 
-    /** The smallest minimum password length a manager may configure. */
     private static final int SMALLEST_MINIMUM_LENGTH = 4;
 
-    /** The largest minimum password length a manager may configure. */
     private static final int LARGEST_MINIMUM_LENGTH = 32;
 
-    /** The data behind the table. */
     private final transient EmployeeTableModel tableModel = new EmployeeTableModel();
 
-    /** The table showing the employee accounts. */
     private final JTable employeesTable = new JTable(tableModel);
 
-    /** The line at the bottom reporting what happened. */
     private final JLabel statusLabel = new JLabel(" ");
 
-    /** The controller that performs the employee actions. */
     private final transient EmployeeController employeeController = new EmployeeController();
 
-    /**
-     * Builds the employee management screen and loads the accounts.
-     */
     public EmployeesPanel() {
         super(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -83,11 +59,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         refreshEmployees();
     }
 
-    /**
-     * Builds the row of buttons above the table.
-     *
-     * @return the toolbar panel
-     */
     private JPanel createToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -106,9 +77,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         return toolbar;
     }
 
-    /**
-     * Loads the employee list from the server.
-     */
     private void refreshEmployees() {
         runInBackground("employees-refresh", () -> {
             List<Employee> employees = employeeController.loadEmployees();
@@ -119,13 +87,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Fetches the current policy and then shows the account creation dialog.
-     * <p>
-     * The policy is fetched first so the dialog can display the rules next to
-     * the password field. The user should not have to guess them and be refused.
-     * </p>
-     */
     private void openAddEmployeeDialog() {
         runInBackground("policy-for-new-account", () -> {
             PasswordPolicy policy = employeeController.loadPasswordPolicy();
@@ -133,11 +94,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Shows the account creation dialog and sends the new account.
-     *
-     * @param policy the password policy the chosen password must satisfy
-     */
     private void askForEmployeeDetails(PasswordPolicy policy) {
         JTextField employeeNumberField = new JTextField();
         JTextField fullNameField = new JTextField();
@@ -199,9 +155,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Fetches the current policy and then shows the policy dialog.
-     */
     private void openPasswordPolicyDialog() {
         runInBackground("policy-load", () -> {
             PasswordPolicy policy = employeeController.loadPasswordPolicy();
@@ -209,11 +162,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Shows the policy dialog and sends the new rules.
-     *
-     * @param currentPolicy the policy currently in force
-     */
     private void askForPasswordPolicy(PasswordPolicy currentPolicy) {
         JSpinner minimumLengthSpinner = new JSpinner(new SpinnerNumberModel(
                 currentPolicy.getMinimumLength(), SMALLEST_MINIMUM_LENGTH,
@@ -257,13 +205,6 @@ public class EmployeesPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Called on the Swing thread by the dispatcher when another manager creates
-     * an account.
-     * </p>
-     */
     @Override
     public void onServerEvent(ServerEvent event) {
         if (event.getEventType() != EventType.EMPLOYEES_UPDATED) {
@@ -278,11 +219,6 @@ public class EmployeesPanel extends ServerBackedPanel {
                 + createdEmployee.getFullName());
     }
 
-    /**
-     * Writes a line in the status area.
-     *
-     * @param message the text to show
-     */
     private void showStatus(String message) {
         statusLabel.setText(message);
     }

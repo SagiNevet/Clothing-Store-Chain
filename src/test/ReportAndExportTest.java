@@ -29,25 +29,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests the sales reports and the two exporters.
- * <p>
- * The export tests do more than check that a file appeared: they read the file
- * back and look for the things that make it a valid document. A file that was
- * created but cannot be opened by Word would pass a weaker test and fail during
- * the defence.
- * </p>
- */
 public class ReportAndExportTest {
 
-    /** The service that builds the reports. */
     private final ReportService reportService = new ReportService();
 
-    /**
-     * Makes sure the folders and the demonstration data exist.
-     *
-     * @throws Exception if the data files cannot be prepared
-     */
     @BeforeAll
     public static void prepareData() throws Exception {
         StoragePaths.createDirectoriesIfMissing();
@@ -56,11 +41,6 @@ public class ReportAndExportTest {
         recordSomeSales();
     }
 
-    /**
-     * Records a few sales so the reports have something to summarise.
-     *
-     * @throws Exception if the sales file cannot be written
-     */
     private static void recordSomeSales() throws Exception {
         Product shirt = new Product("P-100", "Blue Cotton Shirt",
                 ProductCategory.SHIRTS, 100.0, 50);
@@ -101,8 +81,7 @@ public class ReportAndExportTest {
         assertTrue(telAvivRow.getNumberOfSales() >= 1);
         assertTrue(telAvivRow.getItemsSold() >= 2);
         assertTrue(telAvivRow.getTotalRevenue() > 0.0);
-        // The discount is the difference between the catalogue price and what was
-        // actually paid, so a sale to a new customer must show one.
+        
         assertTrue(telAvivRow.getTotalDiscount() > 0.0,
                 "the purchase plans must show up as a discount in the report");
     }
@@ -144,8 +123,6 @@ public class ReportAndExportTest {
         String content = new String(Files.readAllBytes(writtenFile.toPath()),
                 StandardCharsets.US_ASCII);
 
-        // These four are what make the file a document rather than a text file
-        // that happens to end in .rtf.
         assertTrue(content.startsWith("{\\rtf1"), "the RTF header is missing");
         assertTrue(content.endsWith("}"), "the document is not closed");
         assertTrue(content.contains("\\trowd"), "the table is missing");
@@ -163,8 +140,6 @@ public class ReportAndExportTest {
         String content = new String(Files.readAllBytes(new File(writtenPath).toPath()),
                 StandardCharsets.US_ASCII);
 
-        // The braces of the name must appear escaped. If they did not, Word would
-        // read them as the end of the document and the file would be corrupt.
         assertTrue(content.contains("\\{tricky\\}"),
                 "the braces of the name were not escaped");
         assertTrue(content.endsWith("}"), "the document is still closed correctly");

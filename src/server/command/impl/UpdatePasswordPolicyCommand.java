@@ -10,19 +10,8 @@ import server.core.ConnectedClient;
 import server.core.ServerContext;
 import server.service.LogManager;
 
-/**
- * Replaces the password policy of the system.
- * <p>
- * Restricted to a shift manager by {@code ActionType.UPDATE_PASSWORD_POLICY}.
- * The change is written to its own file, so it survives a restart of the
- * server, and it applies to every account created from that moment on.
- * </p>
- */
 public class UpdatePasswordPolicyCommand implements Command {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Response execute(Request request, ConnectedClient client) throws ChainStoreException {
         PasswordPolicy newPolicy =

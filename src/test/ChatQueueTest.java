@@ -35,46 +35,24 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Tests the chat feature: opening a conversation, the queue that holds requests
- * nobody could answer, the notification when somebody becomes free, and the
- * rule that only a shift manager may join a conversation already in progress.
- * <p>
- * These tests drive real connections, because the queue only means anything
- * when several employees are connected at the same moment.
- * </p>
- */
 public class ChatQueueTest {
 
-    /** The port used by the server of this test class. */
     private static final int TEST_PORT = 5054;
 
-    /** How long a test waits for something that happens on another thread. */
     private static final int WAIT_TIMEOUT_SECONDS = 15;
 
-    /** The demonstration shift manager of Tel Aviv. */
     private static final String TEL_AVIV_MANAGER = "1001";
 
-    /** The demonstration cashier of Tel Aviv. */
     private static final String TEL_AVIV_CASHIER = "1002";
 
-    /** The demonstration shift manager of Jerusalem. */
     private static final String JERUSALEM_MANAGER = "2001";
 
-    /** The demonstration seller of Jerusalem. */
     private static final String JERUSALEM_SELLER = "2002";
 
-    /** The server under test. */
     private static ChainServer server;
 
-    /** The thread the blocking accept loop runs on. */
     private static Thread serverThread;
 
-    /**
-     * Starts the server once for the whole test class.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     @BeforeAll
     public static void startServer() throws InterruptedException {
         server = new ChainServer(TEST_PORT);
@@ -90,11 +68,6 @@ public class ChatQueueTest {
         waitUntilServerAcceptsConnections();
     }
 
-    /**
-     * Stops the server after the whole class has finished.
-     *
-     * @throws InterruptedException if the wait for the thread is interrupted
-     */
     @AfterAll
     public static void stopServer() throws InterruptedException {
         server.stop();
@@ -118,8 +91,7 @@ public class ChatQueueTest {
 
             assertTrue(response.isSuccess(), response.getMessage());
             assertNotNull(response.getPayload(ProtocolKeys.CHAT_SESSION_ID));
-            // The employee who was chosen must be told, so their window can open
-            // the conversation by itself.
+            
             assertTrue(invitationArrived.await(WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS),
                     "the chosen employee never received the invitation");
 
@@ -159,8 +131,7 @@ public class ChatQueueTest {
     @Test
     @DisplayName("When nobody is free the request goes into the queue")
     public void whenNobodyIsFreeTheRequestIsQueued() throws Exception {
-        // Only one employee of Jerusalem is connected, and the first request
-        // takes them. The second request therefore has nobody left to talk to.
+
         try (TestClient firstTelAviv = new TestClient(TEL_AVIV_CASHIER);
              TestClient secondTelAviv = new TestClient(TEL_AVIV_MANAGER);
              TestClient jerusalem = new TestClient(JERUSALEM_SELLER)) {
@@ -194,11 +165,8 @@ public class ChatQueueTest {
             });
 
             String firstSessionId = firstTelAviv.openChatWith(Branch.JERUSALEM);
-            // This request finds nobody free and stays in the queue.
             waitingTelAviv.requestChat(Branch.JERUSALEM);
 
-            // Closing the first conversation frees the employee of Jerusalem,
-            // which is exactly the moment the queue exists for.
             firstTelAviv.closeChat(firstSessionId);
 
             assertTrue(availabilityArrived.await(WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS),
@@ -212,8 +180,6 @@ public class ChatQueueTest {
         Employee cashier = new Employee(TEL_AVIV_CASHIER, "Ron Levi", "300000002",
                 "050-1000002", "12-345-100002", Branch.TEL_AVIV, Role.CASHIER, "", "");
 
-        // The rule is enforced by the service itself, so it holds no matter which
-        // path reaches it - not only because a button is hidden in the window.
         assertThrows(PermissionDeniedException.class,
                 () -> ChatService.getInstance().joinChat(cashier, "any-session"));
     }
@@ -285,15 +251,13 @@ public class ChatQueueTest {
     @DisplayName("A conversation with a branch nobody is connected from is queued")
     public void aRequestToAnEmptyBranchIsQueued() throws Exception {
         try (TestClient telAviv = new TestClient(TEL_AVIV_CASHIER)) {
-            // Nobody of Jerusalem is connected in this test at all.
             Response response = telAviv.requestChat(Branch.JERUSALEM);
 
             assertFalse(response.isSuccess());
             assertTrue(response.getMessage().contains("queue"),
                     "unexpected message: " + response.getMessage());
         } finally {
-            // The request stays in the queue and would notify this employee in a
-            // later test, so it is dropped here.
+            
             ChatQueueManager.getInstance().removeRequestsOf(TEL_AVIV_CASHIER);
         }
     }
@@ -318,11 +282,6 @@ public class ChatQueueTest {
         }
     }
 
-    /**
-     * Waits until the test server is really accepting connections.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     private static void waitUntilServerAcceptsConnections() throws InterruptedException {
         long deadline = System.currentTimeMillis() + WAIT_TIMEOUT_SECONDS * 1000L;
         while (System.currentTimeMillis() < deadline) {
@@ -335,24 +294,12 @@ public class ChatQueueTest {
         fail("The test server did not start listening on port " + TEST_PORT);
     }
 
-    /**
-     * A small client built on the real {@code ServerConnection}, already logged
-     * in as one of the demonstration employees.
-     */
     private static final class TestClient implements AutoCloseable {
 
-        /** The real client connection under test. */
         private final ServerConnection connection = new ServerConnection();
 
-        /** The employee logged in on this connection. */
         private final Employee employee;
 
-        /**
-         * Connects and logs in.
-         *
-         * @param employeeNumber the demonstration employee to log in
-         * @throws ChainStoreException if the connection or the login fails
-         */
         private TestClient(String employeeNumber) throws ChainStoreException {
             connection.connect("localhost", TEST_PORT);
             Response response = connection.send(new Request(ActionType.LOGIN)
@@ -364,26 +311,12 @@ public class ChatQueueTest {
             employee = (Employee) response.getPayload(ProtocolKeys.EMPLOYEE);
         }
 
-        /**
-         * Asks to open a conversation with a branch.
-         *
-         * @param targetBranch the branch to talk to
-         * @return the answer of the server, successful or not
-         * @throws ChainStoreException if the connection fails
-         */
         private Response requestChat(Branch targetBranch) throws ChainStoreException {
             return send(new Request(ActionType.CHAT_REQUEST,
                     employee.getEmployeeNumber(), employee.getBranch())
                     .withParameter(ProtocolKeys.TARGET_BRANCH, targetBranch));
         }
 
-        /**
-         * Opens a conversation and fails the test if it could not be opened.
-         *
-         * @param targetBranch the branch to talk to
-         * @return the identifier of the conversation
-         * @throws ChainStoreException if the connection fails
-         */
         private String openChatWith(Branch targetBranch) throws ChainStoreException {
             Response response = requestChat(targetBranch);
             if (!response.isSuccess()) {
@@ -393,13 +326,6 @@ public class ChatQueueTest {
             return (String) response.getPayload(ProtocolKeys.CHAT_SESSION_ID);
         }
 
-        /**
-         * Sends one message inside a conversation.
-         *
-         * @param sessionId the conversation to write in
-         * @param text      the text to send
-         * @throws ChainStoreException if the connection fails
-         */
         private void sendMessage(String sessionId, String text) throws ChainStoreException {
             send(new Request(ActionType.CHAT_SEND,
                     employee.getEmployeeNumber(), employee.getBranch())
@@ -407,25 +333,12 @@ public class ChatQueueTest {
                     .withParameter(ProtocolKeys.MESSAGE_TEXT, text));
         }
 
-        /**
-         * Closes a conversation.
-         *
-         * @param sessionId the conversation to close
-         * @throws ChainStoreException if the connection fails
-         */
         private void closeChat(String sessionId) throws ChainStoreException {
             send(new Request(ActionType.CHAT_CLOSE,
                     employee.getEmployeeNumber(), employee.getBranch())
                     .withParameter(ProtocolKeys.CHAT_SESSION_ID, sessionId));
         }
 
-        /**
-         * Sends one request and waits for its answer.
-         *
-         * @param request the request to send
-         * @return the answer of the server
-         * @throws ChainStoreException if the connection fails
-         */
         private Response send(Request request) throws ChainStoreException {
             return connection.send(request);
         }

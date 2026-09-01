@@ -36,44 +36,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Tests the network layer of the client against a real server.
- * <p>
- * These tests cover the part of the client that has no window: opening the
- * connection, matching every answer to the request that is waiting for it, and
- * delivering pushed events to the screens. The Swing screens themselves are not
- * tested automatically - they are demonstrated by hand - but everything they
- * rely on is.
- * </p>
- */
 public class ClientConnectionTest {
 
-    /** The port used by the server of this test class. */
     private static final int TEST_PORT = 5052;
 
-    /** How long a test waits for something that happens on another thread. */
     private static final int WAIT_TIMEOUT_SECONDS = 5;
 
-    /** The employee number of the demonstration shift manager of Tel Aviv. */
     private static final String MANAGER_NUMBER = "1001";
 
-    /** The employee number of the demonstration seller of Jerusalem. */
     private static final String SELLER_NUMBER = "2002";
 
-    /** The server under test. */
     private static ChainServer server;
 
-    /** The thread the blocking accept loop runs on. */
     private static Thread serverThread;
 
-    /** The connection under test, closed after every test method. */
     private ServerConnection connection;
 
-    /**
-     * Starts the server once for the whole test class.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     @BeforeAll
     public static void startServer() throws InterruptedException {
         server = new ChainServer(TEST_PORT);
@@ -89,21 +67,12 @@ public class ClientConnectionTest {
         waitUntilServerAcceptsConnections();
     }
 
-    /**
-     * Stops the server after the whole class has finished.
-     *
-     * @throws InterruptedException if the wait for the thread is interrupted
-     */
     @AfterAll
     public static void stopServer() throws InterruptedException {
         server.stop();
         serverThread.join(WAIT_TIMEOUT_SECONDS * 1000L);
     }
 
-    /**
-     * Closes the connection of the test that has just finished, so the next
-     * test starts from a clean state and no session is left open.
-     */
     @AfterEach
     public void closeConnection() {
         if (connection != null && connection.isConnected()) {
@@ -166,9 +135,6 @@ public class ClientConnectionTest {
         List<Response> receivedResponses = new ArrayList<>();
         CountDownLatch allRequestsFinished = new CountDownLatch(numberOfRequests);
 
-        // Every thread sends its own request and stores the answer it received.
-        // This is what proves the request number really does the matching: if the
-        // answers were simply read in arrival order, the pairs would come out mixed.
         for (int requestIndex = 0; requestIndex < numberOfRequests; requestIndex++) {
             Request request = new Request(ActionType.GET_INVENTORY,
                     MANAGER_NUMBER, Branch.TEL_AVIV);
@@ -193,8 +159,6 @@ public class ClientConnectionTest {
                 "not every request received an answer in time");
         assertEquals(numberOfRequests, receivedResponses.size());
 
-        // Each answer must carry the number of one of the requests, and no two
-        // answers may carry the same number.
         List<Long> answeredRequestIds = new ArrayList<>();
         for (Response response : receivedResponses) {
             assertFalse(answeredRequestIds.contains(response.getRequestId()),
@@ -222,8 +186,6 @@ public class ClientConnectionTest {
             assertTrue(telAvivLogin.isSuccess(), telAvivLogin.getMessage());
             assertTrue(jerusalemLogin.isSuccess(), jerusalemLogin.getMessage());
 
-            // This is the demonstration scope of the project: two branches, two
-            // clients, one server, both connected and served at the same moment.
             Employee telAvivEmployee = (Employee) telAvivLogin.getPayload(ProtocolKeys.EMPLOYEE);
             Employee jerusalemEmployee =
                     (Employee) jerusalemLogin.getPayload(ProtocolKeys.EMPLOYEE);
@@ -235,12 +197,6 @@ public class ClientConnectionTest {
         }
     }
 
-    /**
-     * Builds a login request for one of the demonstration accounts.
-     *
-     * @param employeeNumber the employee number to log in
-     * @return the request, ready to be sent
-     */
     private Request loginRequestFor(String employeeNumber) {
         return new Request(ActionType.LOGIN)
                 .withParameter(ProtocolKeys.EMPLOYEE_NUMBER, employeeNumber)
@@ -301,19 +257,12 @@ public class ClientConnectionTest {
         dispatcher.unsubscribe(screen);
         dispatcher.publish(new ServerEvent(EventType.CUSTOMERS_UPDATED));
 
-        // The dispatcher delivers on the Swing thread, so the test waits for that
-        // queue to drain before deciding that nothing arrived.
         SwingUtilities.invokeAndWait(() -> { });
 
         assertEquals(0, eventsSeenByTheScreen.size());
         assertEquals(0, dispatcher.getListenerCount());
     }
 
-    /**
-     * Waits until the test server is really accepting connections.
-     *
-     * @throws InterruptedException if the wait is interrupted
-     */
     private static void waitUntilServerAcceptsConnections() throws InterruptedException {
         long deadline = System.currentTimeMillis() + WAIT_TIMEOUT_SECONDS * 1000L;
         while (System.currentTimeMillis() < deadline) {

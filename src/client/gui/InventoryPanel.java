@@ -29,48 +29,22 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
-/**
- * The inventory screen of one branch: shows the stock and allows selling and
- * restocking.
- * <p>
- * <b>This is the screen that demonstrates the Observer requirement.</b> When an
- * employee of the same branch sells a shirt, the server pushes an
- * {@link EventType#INVENTORY_UPDATED} event, and the quantity in this table
- * changes by itself - no refresh button, no timer. Two clients of the same
- * branch side by side make that visible in one second.
- * </p>
- * <p>
- * The table shows the stock of <b>this branch only</b>, because the server
- * answers according to the branch of the connection and ignores anything the
- * client might claim.
- * </p>
- */
 public class InventoryPanel extends ServerBackedPanel {
 
-    /** Serialization version, required because Swing components are serializable. */
     private static final long serialVersionUID = 1L;
 
-    /** The largest quantity that may be sold or received in one action. */
     private static final int MAXIMUM_QUANTITY_PER_ACTION = 999;
 
-    /** The data behind the table. */
     private final transient ProductTableModel tableModel = new ProductTableModel();
 
-    /** The table showing the stock. */
     private final JTable inventoryTable = new JTable(tableModel);
 
-    /** The line at the bottom reporting what happened. */
     private final JLabel statusLabel = new JLabel(" ");
 
-    /** The controller that performs the inventory actions. */
     private final transient InventoryController inventoryController = new InventoryController();
 
-    /** The controller used to fetch the customers for a sale. */
     private final transient CustomerController customerController = new CustomerController();
 
-    /**
-     * Builds the inventory screen and loads the stock.
-     */
     public InventoryPanel() {
         super(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -85,11 +59,6 @@ public class InventoryPanel extends ServerBackedPanel {
         refreshInventory();
     }
 
-    /**
-     * Builds the row of buttons above the table.
-     *
-     * @return the toolbar panel
-     */
     private JPanel createToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -105,9 +74,6 @@ public class InventoryPanel extends ServerBackedPanel {
         restockButton.addActionListener(actionEvent -> openRestockDialog());
         toolbar.add(restockButton);
 
-        // Adding a catalogue product is a management decision, so the button is
-        // only built for a shift manager. The server refuses it for anybody else
-        // in any case - this only avoids showing a button that would be refused.
         if (ClientSession.getInstance().getRole().canManageEmployees()) {
             JButton addProductButton = new JButton("Add product");
             addProductButton.addActionListener(actionEvent -> openAddProductDialog());
@@ -117,9 +83,6 @@ public class InventoryPanel extends ServerBackedPanel {
         return toolbar;
     }
 
-    /**
-     * Loads the stock of this branch from the server.
-     */
     private void refreshInventory() {
         runInBackground("inventory-refresh", () -> {
             List<Product> stock = inventoryController.loadInventory();
@@ -131,29 +94,18 @@ public class InventoryPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Asks for a quantity and a customer, and performs the sale.
-     */
     private void openSellDialog() {
         Product selectedProduct = getSelectedProduct();
         if (selectedProduct == null) {
             return;
         }
 
-        // The customer list is fetched first, because a sale cannot happen
-        // without choosing who is buying.
         runInBackground("sell-prepare", () -> {
             List<Customer> customers = customerController.loadCustomers();
             SwingUtilities.invokeLater(() -> askForSaleDetails(selectedProduct, customers));
         });
     }
 
-    /**
-     * Shows the sale dialog and sends the sale.
-     *
-     * @param selectedProduct the product the user selected in the table
-     * @param customers       the customers that may buy
-     */
     private void askForSaleDetails(Product selectedProduct, List<Customer> customers) {
         if (customers.isEmpty()) {
             showError("There are no customers yet. Register a customer first, "
@@ -190,12 +142,6 @@ public class InventoryPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Reports a completed sale, showing what the purchase plan of the customer
-     * was worth.
-     *
-     * @param sale the sale recorded by the server
-     */
     private void showSaleResult(Sale sale) {
         showInfo("Sold " + sale.getQuantity() + " x " + sale.getProductName()
                 + System.lineSeparator()
@@ -208,9 +154,6 @@ public class InventoryPanel extends ServerBackedPanel {
         showStatus("Sale " + sale.getSaleId() + " completed");
     }
 
-    /**
-     * Asks for a quantity and records a delivery from a supplier.
-     */
     private void openRestockDialog() {
         Product selectedProduct = getSelectedProduct();
         if (selectedProduct == null) {
@@ -235,9 +178,6 @@ public class InventoryPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Asks for the details of a new catalogue product and creates it.
-     */
     private void openAddProductDialog() {
         JTextField productIdField = new JTextField();
         JTextField nameField = new JTextField();
@@ -269,8 +209,7 @@ public class InventoryPanel extends ServerBackedPanel {
         try {
             price = Double.parseDouble(priceField.getText().trim());
         } catch (NumberFormatException invalidPrice) {
-            // A typing mistake in a text field is not a business failure, so it is
-            // handled right here instead of travelling to the server.
+            
             showError("The price must be a number, for example 89.90");
             return;
         }
@@ -288,32 +227,17 @@ public class InventoryPanel extends ServerBackedPanel {
         });
     }
 
-    /**
-     * Returns the product selected in the table, complaining when none is.
-     *
-     * @return the selected product, or {@code null} when nothing is selected
-     */
     private Product getSelectedProduct() {
         int selectedRow = inventoryTable.getSelectedRow();
         if (selectedRow < 0) {
             showError("Select a product in the table first.");
             return null;
         }
-        // The row sorter lets the user sort the table, so the row on screen is
-        // not necessarily the row of the model. This conversion is what keeps the
-        // right product selected after sorting.
+
         int modelRow = inventoryTable.convertRowIndexToModel(selectedRow);
         return tableModel.getProductAt(modelRow);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Called on the Swing thread by the dispatcher. An inventory event carries
-     * the product that changed, so only that one row is updated - the selection
-     * and the scrolling position of the user stay exactly where they were.
-     * </p>
-     */
     @Override
     public void onServerEvent(ServerEvent event) {
         if (event.getEventType() != EventType.INVENTORY_UPDATED) {
@@ -328,11 +252,6 @@ public class InventoryPanel extends ServerBackedPanel {
                 + changedProduct.getQuantity() + " in stock");
     }
 
-    /**
-     * Writes a line in the status area.
-     *
-     * @param message the text to show
-     */
     private void showStatus(String message) {
         statusLabel.setText(message);
     }

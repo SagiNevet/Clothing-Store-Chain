@@ -13,36 +13,13 @@ import server.storage.InventoryRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Fills the data files with demonstration content the first time the server
- * runs on a clean machine.
- * <p>
- * Without this class the system would start with an empty employees file, and
- * nobody could ever log in - there would be no account to create the first
- * account with. Seeding also means every member of the group sees exactly the
- * same data on their own laptop during the defence.
- * </p>
- * <p>
- * Nothing is overwritten: each file is seeded only when it is still empty, so
- * restarting the server never touches data that has been created since.
- * </p>
- */
 public final class DataSeeder {
 
-    /** The password given to every demonstration account. */
     private static final String DEMO_PASSWORD = "Chain@2026";
 
-    /**
-     * Prevents instantiation. This class only exposes static methods.
-     */
     private DataSeeder() {
     }
 
-    /**
-     * Creates the demonstration employees and inventory if they do not exist yet.
-     *
-     * @throws StorageException if a data file cannot be read or written
-     */
     public static void seedIfEmpty() throws StorageException {
         seedEmployeesIfEmpty();
         for (Branch branch : Branch.values()) {
@@ -50,11 +27,6 @@ public final class DataSeeder {
         }
     }
 
-    /**
-     * Creates one shift manager and one selling employee per branch.
-     *
-     * @throws StorageException if the employees file cannot be read or written
-     */
     private static void seedEmployeesIfEmpty() throws StorageException {
         EmployeeRepository employeeRepository =
                 ServerContext.getInstance().getEmployeeRepository();
@@ -77,18 +49,6 @@ public final class DataSeeder {
                 + " demonstration employees, all with the password " + DEMO_PASSWORD);
     }
 
-    /**
-     * Creates one employee account with a freshly hashed password.
-     *
-     * @param employeeNumber    the employee number, used as the login name
-     * @param fullName          the full name of the employee
-     * @param idNumber          the national identity number
-     * @param phone             the phone number
-     * @param bankAccountNumber the bank account number
-     * @param branch            the branch the employee works in
-     * @param role              the single role the employee holds
-     * @return the employee account, ready to be saved
-     */
     private static Employee createEmployee(String employeeNumber, String fullName,
                                            String idNumber, String phone,
                                            String bankAccountNumber, Branch branch, Role role) {
@@ -98,17 +58,6 @@ public final class DataSeeder {
                 bankAccountNumber, branch, role, salt, hash);
     }
 
-    /**
-     * Creates a starting stock for one branch.
-     * <p>
-     * The two branches deliberately receive the same catalogue products with
-     * different quantities, which makes the "separate inventory per branch"
-     * requirement visible on screen during the demonstration.
-     * </p>
-     *
-     * @param branch the branch to fill
-     * @throws StorageException if the inventory file cannot be read or written
-     */
     private static void seedInventoryIfEmpty(Branch branch) throws StorageException {
         InventoryRepository inventoryRepository =
                 ServerContext.getInstance().getInventoryRepository(branch);
@@ -136,12 +85,6 @@ public final class DataSeeder {
                 + " products for " + branch.getDisplayName());
     }
 
-    /**
-     * Returns the password shared by every demonstration account, so the README
-     * and the login screen can display it.
-     *
-     * @return the demonstration password
-     */
     public static String getDemoPassword() {
         return DEMO_PASSWORD;
     }

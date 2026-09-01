@@ -13,22 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests the stock rules of a product, including the attempt to sell more items
- * than the branch actually holds.
- */
 public class ProductStockTest {
 
-    /** The quantity every test starts from. */
     private static final int INITIAL_QUANTITY = 10;
 
-    /** The product under test, rebuilt before every test method. */
     private Product shirt;
 
-    /**
-     * Builds a fresh product before each test, so no test can be affected by
-     * the changes of another one.
-     */
     @BeforeEach
     public void createShirt() {
         shirt = new Product("P-100", "Blue Shirt", ProductCategory.SHIRTS, 89.90, INITIAL_QUANTITY);
@@ -60,8 +50,7 @@ public class ProductStockTest {
         assertEquals("P-100", failure.getProductId());
         assertEquals(INITIAL_QUANTITY + 1, failure.getRequestedQuantity());
         assertEquals(INITIAL_QUANTITY, failure.getAvailableQuantity());
-        // The most important assertion of this test: a refused sale must leave
-        // the stock exactly as it was, never in a half changed state.
+        
         assertEquals(INITIAL_QUANTITY, shirt.getQuantity());
     }
 
@@ -101,8 +90,7 @@ public class ProductStockTest {
         assertNotSame(shirt, copyOfShirt);
         assertEquals(INITIAL_QUANTITY, shirt.getQuantity());
         assertEquals(6, copyOfShirt.getQuantity());
-        // equals compares the catalogue identifier, so the copy is still
-        // considered the same catalogue product.
+        
         assertTrue(shirt.equals(copyOfShirt));
     }
 }

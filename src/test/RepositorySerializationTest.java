@@ -32,20 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests that every kind of object survives a trip to a file and back.
- * <p>
- * Every test writes into a temporary folder created by JUnit, so running the
- * tests can never damage the real data of the system. The folder is deleted
- * automatically when the test finishes.
- * </p>
- */
 public class RepositorySerializationTest {
 
-    /** The tolerance used when comparing money amounts held in a double. */
     private static final double MONEY_TOLERANCE = 0.001;
 
-    /** A temporary folder created and deleted by JUnit for each test. */
     @TempDir
     File temporaryDataFolder;
 
@@ -91,9 +81,6 @@ public class RepositorySerializationTest {
 
         Customer loadedCustomer = repository.loadAll().get(0);
 
-        // This is the assertion that proves the polymorphism survives a restart
-        // of the server: the object was rebuilt from bytes and still runs the
-        // VIP purchase plan, 15 percent off, without anybody telling it to.
         assertInstanceOf(Customer.class, loadedCustomer);
         assertEquals(170.0, loadedCustomer.calculateFinalPrice(100.0, 2), MONEY_TOLERANCE);
     }
@@ -161,8 +148,6 @@ public class RepositorySerializationTest {
         jerusalemStock.add(new Product("P-200", "Black Pants", ProductCategory.PANTS, 149.90, 5));
         jerusalemRepository.saveAll(jerusalemStock);
 
-        // The same catalogue product exists in both branches with a different
-        // quantity, which is exactly what a separate file per branch means.
         assertEquals(1, telAvivRepository.loadAll().size());
         assertEquals(10, telAvivRepository.loadAll().get(0).getQuantity());
         assertEquals(2, jerusalemRepository.loadAll().size());
