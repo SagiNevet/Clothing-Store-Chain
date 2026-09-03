@@ -8,12 +8,12 @@ A distributed Java client, server enterprise platform for managing multi branch 
 
 | # | Name | ID |
 |---|---|---|
-| 1 | Teva Jalink | 208181446 |
-| 2 | Michelle Aizikovich | 317868172 |
-| 3 | Sagi Nevet | 314618166 |
-| 4 |  |  |
-| 5 |  |  |
-| 6 |  |  |
+| 1 | Sagi Nevet | 314618166 |
+| 2 | Teva Jalink | 208181446 |
+| 3 | Michelle Aizikovich | 317868172 |
+| 4 | Roman Pilnik | 318016532 |
+| 5 | Amit Gutfeld | 313161481 |
+| 6 | Johnathan Zachevsky | 211397542 |
 
 ***
 
