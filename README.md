@@ -31,7 +31,7 @@ The project implements a decoupled **Client Server Architecture**:
 
 * **`src/common/`**: Shared domain models (`Employee`, `Customer`, `Product`, `Sale`), custom checked exceptions (`ChainStoreException`), network protocol objects (`Request`, `Response`, `ServerEvent`), and utilities (`PasswordHasher`, `AppConfig`, `IdGenerator`).
 * **`src/server/`**: Multi threaded TCP server (`ChainServer`, `ClientHandler`), business command dispatcher (`CommandFactory`), thread pool executor (`BusinessTaskExecutor`), domain services, inter branch chat queue manager (`ChatQueueManager`), report exporters (JSON and Word RTF), and binary file persistence repositories.
-* **`src/client/`**: Interactive text based console interface (`ConsoleMain`), domain controllers (`InventoryController`, `CustomerController`, `ChatController`), asynchronous event dispatcher (`ClientEventDispatcher`), and socket connection layer (`ServerConnection`). A Swing graphical interface is also provided (`LoginFrame`).
+* **`src/client/`**: Interactive text based console interface (`ConsoleMain`), domain controllers (`InventoryController`, `CustomerController`, `ChatController`), asynchronous event dispatcher (`ClientEventDispatcher`), and socket connection layer (`ServerConnection`).
 * **`src/test/`**: 90 automated unit and integration tests verifying business logic, concurrency, persistence, socket communications, and design patterns.
 
 ***
@@ -81,8 +81,6 @@ run_client.bat
 ```bash
 java -cp out client.console.ConsoleMain
 ```
-
-*(Optional graphical interface client: `run_client_gui.bat` or `java -cp out client.gui.LoginFrame`)*
 
 ***
 
